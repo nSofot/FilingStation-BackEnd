@@ -11,7 +11,6 @@ export async function getProducts(req,res) {
             const products = await Product.find({isAvailable : true})
             res.json(products)
         }
-
     }
     catch(err){
         res.status(500).json({
@@ -31,9 +30,7 @@ export function saveProduct(req, res) {
         return
     } 
 
-    const product = new Product
-    (
-        req.body
+    const product = new Product(req.body
     );
 
     product

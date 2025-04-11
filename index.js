@@ -1,8 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import productRouter from "./Routes/productRouter.js";
 import userRouter from "./Routes/userRouter.js";
+import productRouter from "./Routes/productRouter.js";
+import customerRouter from "./Routes/customerRouter.js";
 import jwt from "jsonwebtoken";
 
 
@@ -47,6 +48,7 @@ mongoose.connect("mongodb+srv://admin:123@cluster0.ykfz5tz.mongodb.net/?retryWri
 app.use("/product", productRouter);
 app.use("/user", userRouter);
 app.use("/user/login", userRouter);
+app.use("/customer", customerRouter);
 
 
 app.listen(3000, () => {
