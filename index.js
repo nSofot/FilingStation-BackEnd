@@ -5,6 +5,7 @@ import userRouter from "./Routes/userRouter.js";
 import productRouter from "./Routes/productRouter.js";
 import customerRouter from "./Routes/customerRouter.js";
 import supplierRouter from "./Routes/supplierRouter.js";
+import transactionRouter from "./Routes/transactionRouter.js";
 import jwt from "jsonwebtoken";
 
 
@@ -51,6 +52,7 @@ app.use("/user", userRouter);
 app.use("/user/login", userRouter);
 app.use("/customer", customerRouter);
 app.use("/supplier", supplierRouter);
+app.use("/transaction", transactionRouter);
 
 
 app.listen(3000, () => {

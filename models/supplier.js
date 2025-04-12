@@ -31,8 +31,11 @@ const supplierSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: "Active"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-    
 });
 
 const Supplier = mongoose.model("Supplier", supplierSchema);

@@ -43,8 +43,11 @@ const customerSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: "Active"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-    
 });
 
 const Customer = mongoose.model("Customer", customerSchema);
