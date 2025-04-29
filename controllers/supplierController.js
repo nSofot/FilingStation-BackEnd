@@ -52,7 +52,15 @@ export async function deleteSupplier(req, res) {
     } 
 
     try{
-        await Supplier.deleteOne({supplierId : req.params.supplierId})
+        const result = await Supplier.deleteOne({supplierId : req.params.supplierId})
+
+        if (result.deletedCount === 0) {
+            // No customer found with that ID
+            res.status(404).json({
+                message: "Customer not found"
+            });
+            return;
+        }
 
         res.json({
             message : "Supplier deleted successfully"
@@ -63,5 +71,38 @@ export async function deleteSupplier(req, res) {
             message : "Failed to delete supplier",
             error: err
         })
+    }
+}
+
+export async function updateSupplier(req, res) {
+    if (!isAdmin(req)) {
+        res.status(403).json({
+            message: "You are not authorized to update supplier"
+        });
+        return;
+    }
+
+    const supplierId = req.params.supplierId;
+    const updatingData = req.body;
+
+    try {
+        const result = await Supplier.updateOne({ supplierId: supplierId }, updatingData);
+
+        if (result.matchedCount === 0) {
+            // No customer found with that ID
+            res.status(404).json({
+                message: "Supplier not found"
+            });
+            return;
+        }
+
+        res.json({
+            message: "Supplier updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update supplier",
+            error: err.message || err
+        });
     }
 }

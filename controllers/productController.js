@@ -20,6 +20,45 @@ export async function getProducts(req,res) {
     }
 }
 
+
+export async function getProductById(req, res) {
+    const productId = req.params.productId
+
+    try{
+        const products = await Product.findOne({productId : productId})
+        if (products == null) {
+            res.status(404).json({
+                message : "Product not found"
+            })
+            return
+        }
+
+        if(products.isAvailable){
+            res.json(products)
+        }
+        else{
+            if(!isAdmin(req)){
+                res.status(404).json({
+                message : "Product not found"
+            })
+            return
+            }
+            else{
+                res.json(products)
+            }                
+        }
+    }
+
+    catch(err){
+        res.status(500).json({
+            message : "Error getting product",
+            error: err
+        })
+    }
+}
+
+
+
 export function saveProduct(req, res) {
 
     if(!isAdmin(req))
@@ -57,7 +96,15 @@ export async function deleteProduct(req, res) {
     } 
 
     try{
-        await Product.deleteOne({productId : req.params.productId})
+        const result = await Product.deleteOne({ productId: req.params.productId });
+
+        if (result.deletedCount === 0) {
+            // No customer found with that ID
+            res.status(404).json({
+                message: "Customer not found"
+            });
+            return;
+        }
 
         res.json({
             message : "Product deleted successfully"
@@ -72,25 +119,34 @@ export async function deleteProduct(req, res) {
 }
 
 export async function updateProduct(req, res) {
-    if(!isAdmin(req))
-    {
+    if (!isAdmin(req)) {
         res.status(403).json({
-            message : "You are not authorized to update products"
-        })
-        return
-    }   
-
-    try{
-        await Product.updateOne({productId : req.body.productId},req.body)
-
-        res.json({    
-            message : "Product updated successfully"
-        })
+            message: "You are not authorized to update products"
+        });
+        return;
     }
-    catch(err){
+
+    const productId = req.params.productId;
+    const updatingData = req.body;
+
+    try {
+        const result = await Product.updateOne({ productId: productId }, updatingData);
+
+        if (result.matchedCount === 0) {
+            // No product found with that ID
+            res.status(404).json({
+                message: "Product not found"
+            });
+            return;
+        }
+
+        res.json({
+            message: "Product updated successfully"
+        });
+    } catch (err) {
         res.status(500).json({
-            message : "Failed to update product",
+            message: "Failed to update product",
             error: err
-        })
+        });
     }
 }
