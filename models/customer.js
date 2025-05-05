@@ -39,12 +39,16 @@ const customerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },    
-    status: {
+    isActive: {
         type: String,
         required: true,
-        default: "Active"
+        default: true
     },
     createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
         type: Date,
         default: Date.now
     }

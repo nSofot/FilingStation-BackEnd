@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const transactionSchema = new mongoose.Schema({
-    transactionId: {
+    trxId: {
         type: String,
         required: true,
         unique: true

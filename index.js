@@ -7,11 +7,16 @@ import customerRouter from "./Routes/customerRouter.js";
 import supplierRouter from "./Routes/supplierRouter.js";
 import transactionRouter from "./Routes/transactionRouter.js";
 import jwt from "jsonwebtoken";
+import cors from "cors";
+import dotenv from "dotenv";
 
+dotenv.config();
 
 const app = express();
 
+app.use(cors());
 app.use(bodyParser.json());
+
 
 app.use(
     (req, res, next) => {
@@ -19,7 +24,7 @@ app.use(
         if(tokenString != null) {
             const token = tokenString.replace("Bearer ", "")
  
-            jwt.verify(token, "nsoft-tec#2025",
+            jwt.verify(token, process.env.JWT_KEY,
             (err, decoded) => {
                 if(decoded != null) {
                     req.user = decoded
@@ -36,8 +41,8 @@ app.use(
     }
 )
 
-//mongodb+srv://admin:<db_password>@cluster0.ykfz5tz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-mongoose.connect("mongodb+srv://admin:123@cluster0.ykfz5tz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+
+mongoose.connect(process.env.MONGODB_URL)
 .then(() => {
     console.log("Connected to database");
 })
@@ -46,13 +51,14 @@ mongoose.connect("mongodb+srv://admin:123@cluster0.ykfz5tz.mongodb.net/?retryWri
 })
 
 
+app.use("/api/product", productRouter);
 
-app.use("/product", productRouter);
-app.use("/user", userRouter);
-app.use("/user/login", userRouter);
-app.use("/customer", customerRouter);
-app.use("/supplier", supplierRouter);
-app.use("/transaction", transactionRouter);
+app.use("/api/user", userRouter);
+app.use("/api/user/login", userRouter);
+app.use("/api/user/users", userRouter);
+app.use("/api/customer", customerRouter);
+app.use("/api/supplier", supplierRouter);
+app.use("/api/transaction", transactionRouter);
 
 
 app.listen(3000, () => {

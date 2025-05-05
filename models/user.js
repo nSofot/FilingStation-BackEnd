@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
+    mobile: { 
+        type: String,  
+    },
     password: { 
         type: String, 
         required: true 
@@ -21,14 +24,14 @@ const userSchema = new mongoose.Schema({
     role: { 
         type: String, 
         required: true, 
-        default: "User" 
+        default: "Viewer" 
     },
-    status: { 
+    isActive: { 
         type: String, 
         required: true, 
-        default: "Active" 
+        default: true
     },
-    Image: { 
+    image: { 
         type: String, 
         required: false, 
         default: "https://avatar.iran.liara.run/public/boy?username=Ash"},
@@ -36,7 +39,7 @@ const userSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now 
     },
-    createdAt: {
+    updatedAt: {
         type: Date,
         default: Date.now
     }

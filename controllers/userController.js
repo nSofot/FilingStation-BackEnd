@@ -1,6 +1,10 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 
 export function createUser(req, res) {
 
@@ -22,7 +26,7 @@ export function createUser(req, res) {
     }
 
 
-    const hashpassword = bcrypt.hashSync("Gorilla#2025"+req.body.password, 10);
+    const hashpassword = bcrypt.hashSync(process.env.JWT_KEY+req.body.password, 10);
 
     const user = new User({
         email: req.body.email,
@@ -30,9 +34,10 @@ export function createUser(req, res) {
         lastname: req.body.lastname,
         password: hashpassword,
         role: req.body.role,
-        status: req.body.status,
-        Image: req.body.Image,
-        createdAt: req.body.createdAt
+        isActive: req.body.status,
+        image: req.body.image,
+        createdAt: req.body.createdAt,
+        updatedAt: req.body.updatedAt
     });
     
     user
@@ -51,7 +56,7 @@ export function createUser(req, res) {
 
 export function loginUsers(req, res) {
     const email = req.body.email
-    const password = "Gorilla#2025"+req.body.password
+    const password = process.env.JWT_KEY+req.body.password
 
     User.findOne({ email: email })
     .then(
@@ -69,9 +74,9 @@ export function loginUsers(req, res) {
                     firstname: user.firstname,
                     lastname: user.lastname,
                     role: user.role,
-                    Image: user.Image
+                    image: user.image
                 },
-                "nsoft-tec#2025",
+                process.env.JWT_KEY,
                 )
                 res.status(200).json({
                     message: "Login successful",
@@ -86,12 +91,39 @@ export function loginUsers(req, res) {
     ))
 }
 
+
+export async function getUsers(req,res) {
+
+    try{
+        // if(isAdmin(req)){
+            const users = await User.find()
+            res.json(users)
+        // }
+        // else{
+        //     res.status(403).json({
+        //         message : "You are not authorized to get users"
+        //     })
+        // }
+    }
+    catch(err){
+        res.status(500).json({
+            message : "Error getting users",
+            error: err
+        })
+    }
+}
+
+
 export function isAdmin(req) {
     if(req.user == null) {
         return false
     }
 
     if(req.user.role != "admin") {
+        return false
+    }
+
+    if(req.user.isActive =false) {
         return false
     }
     return true
