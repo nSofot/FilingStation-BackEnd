@@ -23,7 +23,7 @@ const supplierSchema = new mongoose.Schema({
     email: {
         type: String
     },
-    Balance: {
+    balance: {
         type: Number,
         default: 0
     },    

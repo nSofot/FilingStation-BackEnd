@@ -35,7 +35,7 @@ const customerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    Balance: {
+    balance: {
         type: Number,
         default: 0
     },    

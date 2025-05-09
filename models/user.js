@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true,
+        unique: true
+    },
     email: { 
         type: String, 
         required: true, 
@@ -32,8 +37,7 @@ const userSchema = new mongoose.Schema({
         default: true
     },
     image: { 
-        type: String, 
-        required: false, 
+        type: String,  
         default: "https://avatar.iran.liara.run/public/boy?username=Ash"},
     createdAt: { 
         type: Date, 

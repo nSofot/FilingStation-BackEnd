@@ -8,9 +8,9 @@ dotenv.config();
 
 export function createUser(req, res) {
 
-    if(req.body.role != "admin") {
+    if(req.body.role != "Admin") {
         if(req.user !=null){
-            if(req.user.role != "admin") {
+            if(req.user.role != "Admin") {
                res.status(403).json({
                    message : "You are not authorized to add admin account"
                })
@@ -29,9 +29,11 @@ export function createUser(req, res) {
     const hashpassword = bcrypt.hashSync(process.env.JWT_KEY+req.body.password, 10);
 
     const user = new User({
+        userId: req.body.userId,
         email: req.body.email,
         firstname: req.body.firstname,
         lastname: req.body.lastname,
+        mobile: req.body.mobile,
         password: hashpassword,
         role: req.body.role,
         isActive: req.body.status,
@@ -70,6 +72,7 @@ export function loginUsers(req, res) {
             if (isPasswordValid) {
                 const token = jwt.sign(
                 {
+                    userId: user.userId,
                     email: user.email,
                     firstname: user.firstname,
                     lastname: user.lastname,
@@ -95,15 +98,15 @@ export function loginUsers(req, res) {
 export async function getUsers(req,res) {
 
     try{
-        // if(isAdmin(req)){
+        if(isAdmin(req)){
             const users = await User.find()
             res.json(users)
-        // }
-        // else{
-        //     res.status(403).json({
-        //         message : "You are not authorized to get users"
-        //     })
-        // }
+        }
+        else{
+            res.status(403).json({
+                message : "You are not authorized to get users"
+            })
+        }
     }
     catch(err){
         res.status(500).json({
@@ -119,12 +122,12 @@ export function isAdmin(req) {
         return false
     }
 
-    if(req.user.role != "admin") {
+    if(req.user.role != "Admin") {
         return false
     }
 
-    if(req.user.isActive =false) {
-        return false
-    }
+    // if(req.user.isActive =false) {
+    //     return false
+    // }
     return true
 }
