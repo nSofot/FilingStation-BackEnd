@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-export function createUser(req, res) {
+export async function createUser(req, res) {
 
     if(req.body.role != "Admin") {
         if(req.user !=null){
@@ -25,11 +25,22 @@ export function createUser(req, res) {
         }
     }
 
+    //Generate User Id
+    let UserId = "USR-00001"
+
+    const lastUser = await User.find().sort({createdAt : -1}).limit(1)
+
+    if (lastUser.length > 0) {
+        const lastUserId = lastUser[0].userId
+        const lastUserIdNumber = parseInt(lastUserId.replace("USR-", ""))
+        const newUserIdNumber = (parseInt(lastUserIdNumber)+1)
+        UserId = "USR-"+String(newUserIdNumber).padStart(4, '0')
+    }
 
     const hashpassword = bcrypt.hashSync(process.env.JWT_KEY+req.body.password, 10);
 
     const user = new User({
-        userId: req.body.userId,
+        userId: UserId,
         email: req.body.email,
         firstname: req.body.firstname,
         lastname: req.body.lastname,

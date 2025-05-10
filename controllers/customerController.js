@@ -4,29 +4,27 @@ import { isAdmin } from "./userController.js";
 
 export async function CreateCustomer(req, res) {
 
-    // if(!isAdmin(req))
-    // {
-    //     res.status(403).json({
-    //         message : "You are not authorized to add customer"
-    //     })
-    //     return
-    // } 
+    if(!isAdmin(req))
+    {
+        res.status(403).json({
+            message : "You are not authorized to add customer"
+        })
+        return
+    } 
 
 
     // Customer Id generate
     let customerId = "CUS-00001"
 
-    const lastCustomerId = await Customer.find().sort({ createdAt: -1 }).limit(1);
+    const lastCustomer = await Customer.find().sort({ createdAt: -1 }).limit(1);
 
 
-    if (lastCustomerId.length > 0) {
-        const lastOrderId = lastCustomerId[0].customerId
-        //const lastOrderIdNumber = lastOrderId.slice(3)
+    if (lastCustomer.length > 0) {
+        const lastCustomerId = lastCustomer[0].customerId
         const lastCustomerIdNumber = parseInt(lastCustomerId.replace("CUS-", ""))
         const newCustoemerIdNumber = (parseInt(lastCustomerIdNumber)+1)
-        customerId = "CUC-"+String(newCustoemerIdNumber).padStart(5, '0')
+        customerId = "CUS-"+String(newCustoemerIdNumber).padStart(5, '0')
     }
-console.log(customerId)
 
     req.body.customerId = customerId
     const customer = new Customer(req.body);
