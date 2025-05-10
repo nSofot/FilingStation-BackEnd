@@ -24,8 +24,6 @@ export async function CreateCustomer(req, res) {
     req.body.customerId = customerId;
     req.body.createdAt = new Date(); 
 
-    console.log("Incoming customer data:", req.body);
-
     const customer = new Customer(req.body);
 
     try {

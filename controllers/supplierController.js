@@ -3,45 +3,40 @@ import { isAdmin } from "./userController.js";
 
 
 export async function CreateSupplier(req, res) {
-
-    if(!isAdmin(req))
-    {
-        res.status(403).json({
-            message : "You are not authorized to add supplier"
-        })
-        return
-    } 
-
-    // Customer Id generate
-    let supplierId = "SUP-00001"
-
-    const lastSupplier = await Supplier.find().sort({ createdAt: -1 }).limit(1);
-
-
-    if (lastSupplier.length > 0) {
-        const lastSupplierrId = lastSupplier[0].supplierId
-        const lastSupplierIdNumber = parseInt(lastSupplierrId.replace("CUS-", ""))
-        const newSupplierIdNumber = (parseInt(lastSupplierIdNumber)+1)
-        supplierId = "SUP-"+String(newSupplierIdNumber).padStart(5, '0')
+    if (!isAdmin(req)) {
+        return res.status(403).json({
+            message: "You are not authorized to add suppliers",
+        });
     }
 
-    req.body.supplierId = supplierId
+    let supplierId = "SUP-00001";
+
+    try {
+        const lastSupplier = await Supplier.find().sort({ createdAt: -1 }).limit(1);
+        if (lastSupplier.length > 0) {
+            const lastId = parseInt(lastSupplier[0].supplierId.replace("SUP-", ""));
+            supplierId = "SUP-" + String(lastId + 1).padStart(5, "0");
+        }
+    } catch (err) {
+        return res.status(500).json({ message: "Failed to fetch last supplier", error: err.message });
+    }
+
+    req.body.supplierId = supplierId;
+    req.body.createdAt = new Date(); 
 
     const supplier = new Supplier(req.body);
 
-    supplier
-        .save()
-        .then(() => {
-            res.json({
-                message: "Supplier added successfully"
-            });
-        })
-        .catch(() => {
-            res.json({
-                message: "Supplier not added"  
-            });
-    })
-}   
+    try {
+        await supplier.save();
+        res.json({ message: "Supplier added" });
+    } catch (error) {
+        console.error("Error saving supplier:", error);
+        res.status(500).json({
+            message: "Supplier not added",
+            error: error.message,
+        });
+    }
+}
 
 
 export async function getSupplier(req,res) {
