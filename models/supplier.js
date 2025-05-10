@@ -26,7 +26,16 @@ const supplierSchema = new mongoose.Schema({
     balance: {
         type: Number,
         default: 0
-    },    
+    },
+    contactPerson: {
+        type: String
+    },
+    taxNumber: {
+        type: String
+    },
+    notes: {
+        type: String
+    },
     isActive: {
         type: String,
         required: true,
@@ -34,7 +43,6 @@ const supplierSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now
     },
     updatedAt: {
         type: Date,

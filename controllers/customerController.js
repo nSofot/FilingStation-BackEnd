@@ -3,45 +3,42 @@ import { isAdmin } from "./userController.js";
 
 
 export async function CreateCustomer(req, res) {
-
-    if(!isAdmin(req))
-    {
-        res.status(403).json({
-            message : "You are not authorized to add customer"
-        })
-        return
-    } 
-
-
-    // Customer Id generate
-    let customerId = "CUS-00001"
-
-    const lastCustomer = await Customer.find().sort({ createdAt: -1 }).limit(1);
-
-
-    if (lastCustomer.length > 0) {
-        const lastCustomerId = lastCustomer[0].customerId
-        const lastCustomerIdNumber = parseInt(lastCustomerId.replace("CUS-", ""))
-        const newCustoemerIdNumber = (parseInt(lastCustomerIdNumber)+1)
-        customerId = "CUS-"+String(newCustoemerIdNumber).padStart(5, '0')
+    if (!isAdmin(req)) {
+        return res.status(403).json({
+            message: "You are not authorized to add customer",
+        });
     }
 
-    req.body.customerId = customerId
+    let customerId = "CUS-00001";
+
+    try {
+        const lastCustomer = await Customer.find().sort({ createdAt: -1 }).limit(1);
+        if (lastCustomer.length > 0) {
+            const lastId = parseInt(lastCustomer[0].customerId.replace("CUS-", ""));
+            customerId = "CUS-" + String(lastId + 1).padStart(5, "0");
+        }
+    } catch (err) {
+        return res.status(500).json({ message: "Failed to fetch last customer", error: err.message });
+    }
+
+    req.body.customerId = customerId;
+    req.body.createdAt = new Date(); 
+
+    console.log("Incoming customer data:", req.body);
+
     const customer = new Customer(req.body);
 
-    customer
-        .save()
-        .then(() => {
-            res.json({
-                message: "Customer added"
-            });
-        })
-        .catch(() => {
-            res.json({
-                message: "Customer not added"  
-            });
-    })
-}   
+    try {
+        await customer.save();
+        res.json({ message: "Customer added" });
+    } catch (error) {
+        console.error("Error saving customer:", error);
+        res.status(500).json({
+            message: "Customer not added",
+            error: error.message,
+        });
+    }
+}
 
 
 export async function getCustomer(req,res) {

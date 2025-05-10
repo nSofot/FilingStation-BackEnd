@@ -27,6 +27,10 @@ const customerSchema = new mongoose.Schema({
     email: {
         type: String
     },
+    balance: {
+        type: Number,
+        default: 0
+    },
     creditLimit: {
         type: Number,
         default: 0
@@ -35,21 +39,29 @@ const customerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    balance: {
-        type: Number,
-        default: 0
-    },    
+    birthDate: {
+        type: Date,
+    },
+    customerType: {
+        type: String,
+        required: true
+    },
+    taxNumber: {
+        type: String,
+    },
+    contactPerson: {
+        type: String,
+    },
+    notes: {
+        type: String
+    },
     isActive: {
         type: String,
         required: true,
         default: true
     },
-    birthDate: {
-        type: Date,
-    },
     createdAt: {
         type: Date,
-        default: Date.now
     },
     updatedAt: {
         type: Date,

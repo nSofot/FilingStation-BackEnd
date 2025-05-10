@@ -58,7 +58,9 @@ app.use("/api/user/login", userRouter);
 app.use("/api/user/users", userRouter);
 
 app.use("/api/customer", customerRouter);
+
 app.use("/api/supplier", supplierRouter);
+
 app.use("/api/transaction", transactionRouter);
 
 app.listen(3000, () => {

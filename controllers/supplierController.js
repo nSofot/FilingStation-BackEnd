@@ -2,7 +2,7 @@ import Supplier from "../models/supplier.js";
 import { isAdmin } from "./userController.js";
 
 
-export function saveSupplier(req, res) {
+export async function CreateSupplier(req, res) {
 
     if(!isAdmin(req))
     {
@@ -12,13 +12,28 @@ export function saveSupplier(req, res) {
         return
     } 
 
+    // Customer Id generate
+    let supplierId = "SUP-00001"
+
+    const lastSupplier = await Supplier.find().sort({ createdAt: -1 }).limit(1);
+
+
+    if (lastSupplier.length > 0) {
+        const lastSupplierrId = lastSupplier[0].supplierId
+        const lastSupplierIdNumber = parseInt(lastSupplierrId.replace("CUS-", ""))
+        const newSupplierIdNumber = (parseInt(lastSupplierIdNumber)+1)
+        supplierId = "SUP-"+String(newSupplierIdNumber).padStart(5, '0')
+    }
+
+    req.body.supplierId = supplierId
+
     const supplier = new Supplier(req.body);
 
     supplier
         .save()
         .then(() => {
             res.json({
-                message: "Supplier added"
+                message: "Supplier added successfully"
             });
         })
         .catch(() => {
