@@ -14,6 +14,9 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    brand: {
+        type: String,
+    },
     description: {
         type: String,
     },
@@ -26,22 +29,21 @@ const productSchema = new mongoose.Schema({
     },
     stock: {
         type: Number,
-        required: true
     },
-    UoM : {
+    uom : {
         type: String,
-        required: true
     },
     reOrderLevel: {
         type: Number,
     },
+    maxStockLevel: {
+        type: Number
+    },
     isAvailable: {
         type: Boolean,
-        required: true    
-    } ,
+    },
     createdAt: {
         type: Date,
-        default: Date.now
     },
     updatedAt: {
         type: Date,

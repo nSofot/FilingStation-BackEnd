@@ -6,6 +6,10 @@ const customerSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    customerType: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
     },
@@ -36,15 +40,11 @@ const customerSchema = new mongoose.Schema({
         default: 0
     },
     creditPeriod: {
-        type: Number,
+        type: String,
         default: 0
     },
     birthDate: {
         type: Date,
-    },
-    customerType: {
-        type: String,
-        required: true
     },
     taxNumber: {
         type: String,

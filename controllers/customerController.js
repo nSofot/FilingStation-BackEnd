@@ -47,7 +47,7 @@ export async function getCustomer(req,res) {
             res.json(customers)
         }
         else{
-            const customers = await Customer.find({status : "Active"})
+            const customers = await Customer.find({isActive : true})
             res.json(customers)
         }
 
@@ -73,7 +73,7 @@ export async function getCustomerById(req, res) {
             return
         }
 
-        if(customer.status == "Active"){
+        if(customer.isActive == true){
             res.json(customer)
         }
         else{

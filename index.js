@@ -5,10 +5,12 @@ import userRouter from "./Routes/userRouter.js";
 import productRouter from "./Routes/productRouter.js";
 import customerRouter from "./Routes/customerRouter.js";
 import supplierRouter from "./Routes/supplierRouter.js";
+import dispenserRouter from "./Routes/dispenserRouter.js";
 import transactionRouter from "./Routes/transactionRouter.js";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
+
 
 dotenv.config();
 
@@ -51,16 +53,16 @@ mongoose.connect(process.env.MONGODB_URL)
 })
 
 
-app.use("/api/product", productRouter);
+
 
 app.use("/api/user", userRouter);
 app.use("/api/user/login", userRouter);
 app.use("/api/user/users", userRouter);
 
 app.use("/api/customer", customerRouter);
-
 app.use("/api/supplier", supplierRouter);
-
+app.use("/api/product", productRouter);
+app.use("/api/dispenser", dispenserRouter);
 app.use("/api/transaction", transactionRouter);
 
 app.listen(3000, () => {
