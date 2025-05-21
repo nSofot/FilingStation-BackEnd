@@ -106,6 +106,77 @@ export function loginUsers(req, res) {
 }
 
 
+
+export async function deleteUser(req, res) {
+    if(!isAdmin(req))
+    {
+        res.status(403).json({
+            message : "You are not authorized to delete users"
+        })
+        return
+    } 
+
+    try{
+        const result = await User.deleteOne({ userId: req.params.userId });
+
+        if (result.deletedCount === 0) {
+            // No customer found with that ID
+            res.status(404).json({
+                message: "User not found"
+            });
+            return;
+        }
+
+        res.json({
+            message : "User deleted successfully"
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            message : "Failed to delete user",
+            error: err
+        })
+    }
+}
+
+
+
+export async function updateUser(req, res) {
+    if (!isAdmin(req)) {
+        res.status(403).json({
+            message: "You are not authorized to update user"
+        });
+        return;
+    }
+
+    const userId = req.params.userId;
+    const updatingData = req.body;
+
+    try {
+        const result = await User.updateOne({ userId: userId }, updatingData);
+
+        if (result.matchedCount === 0) {
+            // No product found with that ID
+            res.status(404).json({
+                message: "User not found"
+            });
+            return;
+        }
+
+        res.json({
+            message: "User updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update user",
+            error: err
+        });
+    }
+}
+
+
+
+
 export async function getUsers(req,res) {
 
     try{
