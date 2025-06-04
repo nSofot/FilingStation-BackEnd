@@ -28,6 +28,22 @@ const transactionSchema = new mongoose.Schema({
     total: {
         type: Number
     },
+    itemDetails: [
+        {
+            productId: {
+                type: String,
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true
+            },
+            price: {
+                type: Number,
+                required: true
+            }
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now

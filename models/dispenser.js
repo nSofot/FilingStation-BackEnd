@@ -16,15 +16,12 @@ const dispenserSchema = new mongoose.Schema({
     },
     attendantId: {
         type: String,
-        required: true
     },
     meterReading: {
         type: Number,
-        required: true
     },
     meterDate: {
         type: Date,
-        required: true
     },
     createdAt: {
         type: Date,

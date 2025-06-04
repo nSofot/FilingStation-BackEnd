@@ -2,11 +2,19 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import userRouter from "./Routes/userRouter.js";
+
 import productRouter from "./Routes/productRouter.js";
+import categoryRouter from "./Routes/categoryRouter.js";
+import brandRouter from "./Routes/brandRouter.js";
+import uomRouter from "./Routes/uomRouter.js";
+
 import customerRouter from "./Routes/customerRouter.js";
 import supplierRouter from "./Routes/supplierRouter.js";
 import dispenserRouter from "./Routes/dispenserRouter.js";
 import transactionRouter from "./Routes/transactionRouter.js";
+
+
+
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -61,7 +69,12 @@ app.use("/api/user/users", userRouter);
 
 app.use("/api/customer", customerRouter);
 app.use("/api/supplier", supplierRouter);
+
 app.use("/api/product", productRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/brand", brandRouter);
+app.use("/api/uom", uomRouter);
+
 app.use("/api/dispenser", dispenserRouter);
 app.use("/api/transaction", transactionRouter);
 

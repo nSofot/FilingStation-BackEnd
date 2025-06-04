@@ -67,8 +67,20 @@ export async function getDispenserById(req, res) {
             return
         }
 
-        res.json(customer)
-
+        if(dispenser.isActive == true){
+            res.json(dispenser)
+        }
+        else{
+            if(!isAdmin(req)){
+                res.status(404).json({
+                message : "Dispenser not found"
+            })
+            return
+            }
+            else{
+                res.json(dispenser)
+            }                
+        }
     }
 
     catch(err){
@@ -84,7 +96,7 @@ export async function getDispenserById(req, res) {
 export async function deleteDispenser(req, res) {
     if (!isAdmin(req)) {
         res.status(403).json({
-            message: "You are not authorized to delete dispenser"
+            message: "You are not authorized to delete customer"
         });
         return;
     }
@@ -93,6 +105,7 @@ export async function deleteDispenser(req, res) {
         const result = await Dispenser.deleteOne({ dispenserId: req.params.dispenserId });
 
         if (result.deletedCount === 0) {
+            // No dispenser found with that ID
             res.status(404).json({
                 message: "Dispenser not found"
             });
@@ -115,7 +128,7 @@ export async function deleteDispenser(req, res) {
 export async function updateDispenser(req, res) {
     if (!isAdmin(req)) {
         res.status(403).json({
-            message: "You are not authorized to update dispenser"
+            message: "You are not authorized to update customer"
         });
         return;
     }
@@ -127,6 +140,7 @@ export async function updateDispenser(req, res) {
         const result = await Dispenser.updateOne({ dispenserId: dispenserId }, updatingData);
 
         if (result.matchedCount === 0) {
+            // No dispenser found with that ID
             res.status(404).json({
                 message: "Dispenser not found"
             });

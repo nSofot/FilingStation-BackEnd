@@ -37,9 +37,8 @@ const supplierSchema = new mongoose.Schema({
         type: String
     },
     isActive: {
-        type: String,
-        required: true,
-        default: false
+        type: Boolean,
+        required: true,        
     },
     createdAt: {
         type: Date,

@@ -6,118 +6,104 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-export async function createUser(req, res) {
+export function isAdmin(req) {
+    return req.user && req.user.role === "Admin";
+}
 
-    if(req.body.role != "Admin") {
-        if(req.user !=null){
-            if(req.user.role != "Admin") {
-               res.status(403).json({
-                   message : "You are not authorized to add admin account"
-               })
-               return
+
+// Create User
+export async function createUser(req, res) {
+    try {
+        const { email, firstname, lastname, mobile, password, role, isActive, image } = req.body;
+
+        if (role === "Admin") {
+            if (!req.user || req.user.role !== "Admin") {
+                return res.status(403).json({ message: "Only admins can create another admin user." });
+            }
+        } else {
+            if (!req.user) {
+                return res.status(403).json({ message: "Please login first to add users." });
             }
         }
-        else{
-            res.status(403).json({
-               message : "You are not authorized to add users. Please login first"
-            })
-            return
+
+        // Auto-generate User ID
+        let newUserId = "USR-0001";
+
+        try {
+            const lastUser = await User.find().sort({ createdAt: -1 }).limit(1);
+            if (lastUser.length > 0) {
+                const lastId = parseInt(lastUser[0].userId.replace("USR-", ""));
+                newUserId= "USR-" + String(lastId + 1).padStart(4, "0");
+            }
+        } catch (err) {
+            return res.status(500).json({ message: "Failed to fetch last user", error: err.message });
         }
-    }
 
-    //Generate User Id
-    let UserId = "USR-00001"
 
-    const lastUser = await User.find().sort({createdAt : -1}).limit(1)
+        // Hash password
+        const hashedPassword = bcrypt.hashSync(process.env.JWT_KEY + password, 10);
 
-    if (lastUser.length > 0) {
-        const lastUserId = lastUser[0].userId
-        const lastUserIdNumber = parseInt(lastUserId.replace("USR-", ""))
-        const newUserIdNumber = (parseInt(lastUserIdNumber)+1)
-        UserId = "USR-"+String(newUserIdNumber).padStart(4, '0')
-    }
-
-    const hashpassword = bcrypt.hashSync(process.env.JWT_KEY+req.body.password, 10);
-
-    const user = new User({
-        userId: UserId,
-        email: req.body.email,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        mobile: req.body.mobile,
-        password: hashpassword,
-        role: req.body.role,
-        isActive: req.body.status,
-        image: req.body.image,
-        createdAt: req.body.createdAt,
-        updatedAt: req.body.updatedAt
-    });
-    
-    user
-    .save()
-    .then(() => {
-        res.json({
-            message: "User added"
-        });    
-    })
-    .catch(() => {
-        res.json({
-            message: "User not added"
+        const user = new User({
+            userId: newUserId,
+            email,
+            firstname,
+            lastname,
+            mobile,
+            password: hashedPassword,
+            role,
+            isActive,
+            image,
         });
-    })  
+
+        await user.save();
+
+        res.status(201).json({ message: "User added successfully" });
+
+    } catch (err) {
+        console.error("Create User Error:", err);
+        res.status(500).json({ message: "Internal server error", error: err.message });
+    }
 }
 
-export function loginUsers(req, res) {
-    const email = req.body.email
-    const password = process.env.JWT_KEY+req.body.password
+// Login User
+export async function loginUsers(req, res) {
+    const { email, password } = req.body;
 
-    User.findOne({ email: email })
-    .then(
-    (user => {
-        if (user == null) {
-            res.status(404).json({
-                message: "User not found"
-            })
-        } else {
-            const isPasswordValid = bcrypt.compareSync(password, user.password)
-            if (isPasswordValid) {
-                const token = jwt.sign(
-                {
-                    userId: user.userId,
-                    email: user.email,
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                    role: user.role,
-                    image: user.image
-                },
-                process.env.JWT_KEY,
-                )
-                res.status(200).json({
-                    message: "Login successful",
-                    token : token
-                })
-            } else {
-                res.status(401).json({
-                    message: "Invalid password"
-                })
-            }   
-        }}
-    ))
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const valid = bcrypt.compareSync(process.env.JWT_KEY + password, user.password);
+        if (!valid) return res.status(401).json({ message: "Invalid password" });
+
+        const token = jwt.sign({
+            userId: user.userId,
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            role: user.role,
+            image: user.image
+        }, process.env.JWT_KEY);
+
+        res.json({ message: "Login successful", token });
+    } catch (err) {
+        res.status(500).json({ message: "Login failed", error: err.message });
+    }
 }
 
 
-
+// Delete User
 export async function deleteUser(req, res) {
     if(!isAdmin(req))
     {
         res.status(403).json({
-            message : "You are not authorized to delete users"
+            message : "You are not authorized to delete user"
         })
         return
     } 
 
     try{
-        const result = await User.deleteOne({ userId: req.params.userId });
+        const result = await User.deleteOne({userId : req.params.userId})
 
         if (result.deletedCount === 0) {
             // No customer found with that ID
@@ -140,76 +126,32 @@ export async function deleteUser(req, res) {
 }
 
 
-
+// Update User
 export async function updateUser(req, res) {
-    if (!isAdmin(req)) {
-        res.status(403).json({
-            message: "You are not authorized to update user"
-        });
-        return;
-    }
-
-    const userId = req.params.userId;
-    const updatingData = req.body;
+    if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
 
     try {
-        const result = await User.updateOne({ userId: userId }, updatingData);
+        const { userId } = req.params;
+        const result = await User.updateOne({ userId }, req.body);
 
         if (result.matchedCount === 0) {
-            // No product found with that ID
-            res.status(404).json({
-                message: "User not found"
-            });
-            return;
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.json({
-            message: "User updated successfully"
-        });
+        res.json({ message: "User updated successfully" });
     } catch (err) {
-        res.status(500).json({
-            message: "Failed to update user",
-            error: err
-        });
+        res.status(500).json({ message: "Failed to update user", error: err.message });
     }
 }
 
+// Get All Users
+export async function getUsers(req, res) {
+    if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
 
-
-
-export async function getUsers(req,res) {
-
-    try{
-        if(isAdmin(req)){
-            const users = await User.find()
-            res.json(users)
-        }
-        else{
-            res.status(403).json({
-                message : "You are not authorized to get users"
-            })
-        }
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch users", error: err.message });
     }
-    catch(err){
-        res.status(500).json({
-            message : "Error getting users",
-            error: err
-        })
-    }
-}
-
-
-export function isAdmin(req) {
-    if(req.user == null) {
-        return false
-    }
-
-    if(req.user.role != "Admin") {
-        return false
-    }
-
-    // if(req.user.isActive =false) {
-    //     return false
-    // }
-    return true
 }

@@ -10,9 +10,9 @@ const dispenserRouter = express.Router();
 
 dispenserRouter.post("/", CreateDispenser);
 dispenserRouter.get("/", getDispenser);
-dispenserRouter.get("/:customerId", getDispenserById);
-dispenserRouter.delete("/:customerId", deleteDispenser);
-dispenserRouter.put("/:customerId", updateDispenser);
+dispenserRouter.get("/:dispenserId", getDispenserById);
+dispenserRouter.delete("/:dispenserId", deleteDispenser);
+dispenserRouter.put("/:dispenserId", updateDispenser);
 
 
 export default dispenserRouter;

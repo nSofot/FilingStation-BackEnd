@@ -10,11 +10,11 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    category: {
+    categoryId: {
         type: String,
         required: true
     },
-    brand: {
+    brandId: {
         type: String,
     },
     description: {
@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema({
     stock: {
         type: Number,
     },
-    uom : {
+    uomId : {
         type: String,
     },
     reOrderLevel: {

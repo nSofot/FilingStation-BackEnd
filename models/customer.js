@@ -56,7 +56,7 @@ const customerSchema = new mongoose.Schema({
         type: String
     },
     isActive: {
-        type: String,
+        type: Boolean,
         required: true,
         default: true
     },
