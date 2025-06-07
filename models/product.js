@@ -23,6 +23,9 @@ const productSchema = new mongoose.Schema({
     image: [
         {type: String},
     ],
+    avarageCost: {
+        type: Number,
+    },
     price: {
         type: Number,
         required: true
