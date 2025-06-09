@@ -25,7 +25,7 @@ export async function getProductById(req, res) {
     const productId = req.params.productId
 
     try{
-        const products = await Product.findOne({productId : productId})
+        const products = await Product.find({productId : productId})
         if (products == null) {
             res.status(404).json({
                 message : "Product not found"
@@ -57,6 +57,29 @@ export async function getProductById(req, res) {
     }
 }
 
+export async function getProductsByCategory(req, res) {
+    const categoryId = req.params.categoryId;
+
+    try {
+        const products = await Product.find({ categoryId: categoryId });
+
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: "No products found in this category" });
+        }
+
+        // Filter based on availability for non-admin users
+        const filteredProducts = isAdmin(req)
+            ? products
+            : products.filter(p => p.isAvailable);
+
+        res.json(filteredProducts);
+    } catch (err) {
+        res.status(500).json({
+            message: "Error getting products",
+            error: err.message,
+        });
+    }
+}
 
 
 export async function saveProduct(req, res) {
@@ -160,3 +183,4 @@ export async function updateProduct(req, res) {
         });
     }
 }
+
