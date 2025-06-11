@@ -1,4 +1,5 @@
 import Dispenser from "../models/dispenser.js";
+import User from "../models/user.js";
 import { isAdmin } from "./userController.js";
 
 
@@ -156,4 +157,84 @@ export async function updateDispenser(req, res) {
             error: err.message || err
         });
     }
+}
+
+
+// Allocate dispenser to an attendant
+export async function allocateDispenser(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { dispenserId, attendantId } = req.body;
+
+    if (!dispenserId || !attendantId) {
+        return res.status(400).json({ message: "dispenserId and attendantId are required" });
+    }
+
+    try {
+        const dispenser = await Dispenser.findOne({ dispenserId });
+        if (!dispenser) return res.status(404).json({ message: "Dispenser not found" });
+
+        const attendant = await User.findOne({ userId: attendantId });
+        if (!attendant || attendant.role !== "Pumpman") {
+            return res.status(400).json({ message: "Invalid attendantId" });
+        }
+
+        dispenser.attendantId = attendantId;
+        dispenser.updatedAt = new Date();
+        await dispenser.save();
+
+        res.json({ message: `Dispenser ${dispenserId} allocated to ${attendant.firstname} ${attendant.lastname}` });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to allocate dispenser", error: err.message });
+    }
+}
+
+
+export async function getDispensersByAttendant(req, res) {
+    const { attendantId } = req.params;
+    try {
+        const dispensers = await Dispenser.find({ attendantId: attendantId });
+        res.json(dispensers);
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch dispensers" });
+    }
+};
+
+// inside dispenserController.js
+
+export async function allocateDispenserMultiple(req, res) {
+  if (!isAdmin(req)) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  const { dispenserIds, attendantId } = req.body;
+  if (!Array.isArray(dispenserIds) || dispenserIds.length === 0 || !attendantId) {
+    return res.status(400).json({ message: "dispenserIds (array) and attendantId required" });
+  }
+
+  try {
+    const attendant = await User.findOne({ userId: attendantId });
+    if (!attendant || attendant.role !== "Pumpman") {
+      return res.status(400).json({ message: "Invalid attendantId" });
+    }
+
+    const result = await Dispenser.updateMany(
+      { dispenserId: { $in: dispenserIds } },
+      {
+        $set: {
+          attendantId,
+          isAllocated: true,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    res.json({
+      message: `${result.nModified} dispensers allocated to ${attendant.firstname} ${attendant.lastname}`
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Bulk allocation failed", error: err.message });
+  }
 }

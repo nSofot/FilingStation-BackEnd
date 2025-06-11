@@ -23,6 +23,10 @@ const dispenserSchema = new mongoose.Schema({
     meterDate: {
         type: Date,
     },
+    isAllocated: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now
