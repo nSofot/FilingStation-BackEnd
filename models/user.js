@@ -38,16 +38,11 @@ const userSchema = new mongoose.Schema({
     image: { 
         type: String,  
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    dateOfBirth: { 
+        type: Date,  
     },
+}, { timestamps: true }); // 👈 Adds createdAt and updatedAt automatically
 
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
-});
 
 const User = mongoose.model("User", userSchema);
 

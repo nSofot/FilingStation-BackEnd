@@ -14,14 +14,20 @@ const dispenserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    attendantId: {
-        type: String,
-    },
     meterReading: {
         type: Number,
     },
     meterDate: {
         type: Date,
+    },
+    attendantId: {
+        type: String,
+    },
+    allocatedAt: {
+        type: Date, 
+    },
+    openingMeter: {
+        type: Number,
     },
     isAllocated: {
         type: Boolean,

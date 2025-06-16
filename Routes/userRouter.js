@@ -4,6 +4,8 @@ import { loginUsers } from "../controllers/userController.js";
 import { getUsers } from "../controllers/userController.js";
 import { updateUser } from "../controllers/userController.js";
 import { deleteUser } from "../controllers/userController.js";
+import { resetPassword } from "../controllers/userController.js";
+import { sendOTP } from "../controllers/userController.js";
 
 
 const userRouter = express.Router();
@@ -13,5 +15,8 @@ userRouter.post("/login", loginUsers);
 userRouter.get("/users", getUsers);
 userRouter.put("/:userId", updateUser);
 userRouter.delete("/:userId", deleteUser);
+userRouter.post("/send-OPT", sendOTP);
+userRouter.post("/reset-password", resetPassword);
+
 
 export default userRouter;

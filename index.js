@@ -13,6 +13,8 @@ import customerRouter from "./Routes/customerRouter.js";
 import supplierRouter from "./Routes/supplierRouter.js";
 import dispenserRouter from "./Routes/dispenserRouter.js";
 import transactionRouter from "./Routes/transactionRouter.js";
+import allocationRoutes from "./routes/allocationRoutes.js";
+
 
 
 
@@ -77,6 +79,8 @@ app.use("/api/brand", brandRouter);
 app.use("/api/uom", uomRouter);
 
 app.use("/api/dispenser", dispenserRouter);
+app.use("/api/allocation", allocationRoutes);
+
 app.use("/api/transaction", transactionRouter);
 
 app.listen(3000, () => {

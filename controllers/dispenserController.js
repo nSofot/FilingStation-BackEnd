@@ -97,7 +97,7 @@ export async function getDispenserById(req, res) {
 export async function deleteDispenser(req, res) {
     if (!isAdmin(req)) {
         res.status(403).json({
-            message: "You are not authorized to delete customer"
+           message: "You are not authorized to delete dispenser"
         });
         return;
     }
@@ -129,7 +129,7 @@ export async function deleteDispenser(req, res) {
 export async function updateDispenser(req, res) {
     if (!isAdmin(req)) {
         res.status(403).json({
-            message: "You are not authorized to update customer"
+           message: "You are not authorized to update dispenser"
         });
         return;
     }
@@ -202,39 +202,75 @@ export async function getDispensersByAttendant(req, res) {
     }
 };
 
-// inside dispenserController.js
 
-export async function allocateDispenserMultiple(req, res) {
-  if (!isAdmin(req)) {
-    return res.status(403).json({ message: "Not authorized" });
-  }
-
-  const { dispenserIds, attendantId } = req.body;
-  if (!Array.isArray(dispenserIds) || dispenserIds.length === 0 || !attendantId) {
-    return res.status(400).json({ message: "dispenserIds (array) and attendantId required" });
-  }
-
-  try {
-    const attendant = await User.findOne({ userId: attendantId });
-    if (!attendant || attendant.role !== "Pumpman") {
-      return res.status(400).json({ message: "Invalid attendantId" });
+// Allocate multiple dispensers to one attendant
+export async function allocateMultipleDispensers(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
     }
 
-    const result = await Dispenser.updateMany(
-      { dispenserId: { $in: dispenserIds } },
-      {
-        $set: {
-          attendantId,
-          isAllocated: true,
-          updatedAt: new Date()
-        }
-      }
-    );
+    const { dispenserIds, attendantId, allocatedAt } = req.body;
 
-    res.json({
-      message: `${result.nModified} dispensers allocated to ${attendant.firstname} ${attendant.lastname}`
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Bulk allocation failed", error: err.message });
-  }
+    if (!dispenserIds || !Array.isArray(dispenserIds) || !attendantId) {
+        return res.status(400).json({ message: "dispenserIds (array) and attendantId are required" });
+    }
+
+    try {
+        const updates = dispenserIds.map(async (dispenserId) => {
+            const dispenser = await Dispenser.findOne({ dispenserId });
+
+            if (!dispenser) return null;
+
+            await Dispenser.updateOne(
+                { dispenserId },
+                {
+                    attendantId,
+                    allocatedAt: allocatedAt || new Date(),
+                    openingMeter: dispenser.meterReading ?? 0,
+                    isAllocated: true,
+                    updatedAt: new Date()
+                }
+            );
+        });
+
+        await Promise.all(updates);
+
+        res.json({ message: "Dispensers allocated successfully" });
+    } catch (err) {
+        console.error("Bulk allocation failed:", err);
+        res.status(500).json({
+            message: "Failed to allocate dispensers",
+            error: err.message || err
+        });
+    }
+}
+
+
+
+export async function deAllocateMultipleDispensers(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "updates array is required" });
+    }
+
+    try {
+        const updatePromises = updates.map(({ dispenserId, updateData }) => {
+        return Dispenser.updateOne({ dispenserId }, updateData);
+        });
+
+        await Promise.all(updatePromises);
+
+        res.json({ message: "Dispensers deallocated successfully" });
+    } catch (err) {
+        console.error("Bulk deallocation failed:", err);
+        res.status(500).json({
+        message: "Failed to deallocate dispensers",
+        error: err.message || err,
+        });
+    }
 }
