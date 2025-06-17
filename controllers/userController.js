@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import OTP from "../models/otp.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import axios from 'axios';
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
@@ -159,6 +160,8 @@ export async function getUsers(req, res) {
         res.status(500).json({ message: "Failed to fetch users", error: err.message });
     }
 }
+
+
 export async function loginWithGoogle(req, res) {
     const token = req.body.accessToken;
 
@@ -175,12 +178,38 @@ export async function loginWithGoogle(req, res) {
 
         let user = await User.findOne({ email });
 
+        // If user doesn't exist, create a new one
+        if (!user) {
+            // Auto-generate User ID
+            let newUserId = "USR-0001";
+            const lastUser = await User.find().sort({ createdAt: -1 }).limit(1);
+            if (lastUser.length > 0) {
+                const lastId = parseInt(lastUser[0].userId.replace("USR-", ""));
+                newUserId = "USR-" + String(lastId + 1).padStart(4, "0");
+            }
+
+            user = new User({
+                userId: newUserId,
+                email,
+                firstname: given_name,
+                lastname: family_name,
+                role: "User",
+                isActive: true,
+                image: picture,
+                password: "", // Optional: since it's Google login
+                dateOfBirth: null
+            });
+
+            await user.save();
+        }
+
         const jwtToken = jwt.sign({
+            userId: user.userId,
             email: user.email,
             firstname: user.firstname,
             lastname: user.lastname,
             role: user.role,
-            Image: user.Image
+            image: user.image,
         }, process.env.JWT_KEY);
 
         res.json({
