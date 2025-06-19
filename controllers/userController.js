@@ -231,10 +231,11 @@ const transport = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: "nihalranathunge@gmail.com",
-        pass: "aiwuodcdqxauehqi"
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
     }
 });
+
 
 
 
@@ -256,7 +257,7 @@ export async function sendOTP(req, res) {
         const message = {
             from: process.env.EMAIL,
             to: email,
-            subject: "Reset Password - Auto Care Filling Station",
+            subject: "Reset Password - FuelManager - Auto Care Filling Station",
             text: `Your password reset OTP is: ${randomOTP}. This OTP will expire in 10 minutes.`,
         };
 
