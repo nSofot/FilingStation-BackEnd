@@ -256,7 +256,7 @@ export async function sendOTP(req, res) {
         const message = {
             from: process.env.EMAIL,
             to: email,
-            subject: "Reset Password - Crystal Beauty Clear",
+            subject: "Reset Password - Auto Care Filling Station",
             text: `Your password reset OTP is: ${randomOTP}. This OTP will expire in 10 minutes.`,
         };
 

@@ -52,6 +52,10 @@ const customerSchema = new mongoose.Schema({
     contactPerson: {
         type: String,
     },
+    vehicleNumbers: {
+        type: [String],
+        default: []
+    },
     notes: {
         type: String
     },

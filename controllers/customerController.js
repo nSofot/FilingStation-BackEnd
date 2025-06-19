@@ -163,3 +163,32 @@ export async function updateCustomer(req, res) {
         });
     }
 }
+
+
+export async function searchCustomers(req, res) {
+	const searchQuery = req.query.query || "";
+
+	try {
+		const regex = { $regex: searchQuery, $options: "i" };
+
+		const filter = {
+			isActive: true,
+			...(searchQuery.trim() !== "" && {
+				$or: [
+					{ name: regex },
+                    { address: regex },
+                    { mobile: regex },
+					{ vehicleNumbers: { $elemMatch: regex } }
+				]
+			})
+		};
+
+		const customers = await Customer.find(filter);
+		res.json(customers);
+	} catch (err) {
+		res.status(500).json({
+			message: "Error searching customers",
+			error: err
+		});
+	}
+}
