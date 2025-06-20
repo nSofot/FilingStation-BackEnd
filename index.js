@@ -14,7 +14,7 @@ import supplierRouter from "./Routes/supplierRouter.js";
 import dispenserRouter from "./Routes/dispenserRouter.js";
 import transactionRouter from "./Routes/transactionRouter.js";
 import allocationRoutes from "./routes/allocationRoutes.js";
-
+import attCreditInvoiceRoutes from "./Routes/attCreditInvoiceRoutes.js";
 
 
 
@@ -82,6 +82,9 @@ app.use("/api/dispenser", dispenserRouter);
 app.use("/api/allocation", allocationRoutes);
 
 app.use("/api/transaction", transactionRouter);
+
+app.use("/api/attCreditInvoice", attCreditInvoiceRoutes);
+
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
