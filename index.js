@@ -1,91 +1,79 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import cors from "cors";
+import dotenv from "dotenv";
 
+// Route Imports
 import userRouter from "./Routes/userRouter.js";
-
 import productRouter from "./Routes/productRouter.js";
 import categoryRouter from "./Routes/categoryRouter.js";
 import brandRouter from "./Routes/brandRouter.js";
 import uomRouter from "./Routes/uomRouter.js";
-
 import customerRouter from "./Routes/customerRouter.js";
 import supplierRouter from "./Routes/supplierRouter.js";
 import dispenserRouter from "./Routes/dispenserRouter.js";
 import transactionRouter from "./Routes/transactionRouter.js";
-import allocationRoutes from "./routes/allocationRoutes.js";
+import allocationRoutes from "./Routes/allocationRoutes.js";
 import attCreditInvoiceRoutes from "./Routes/attCreditInvoiceRoutes.js";
-
-
-
-import jwt from "jsonwebtoken";
-import cors from "cors";
-import dotenv from "dotenv";
+import cardPaymentsRoutes from "./Routes/cardPaymentsRoutes.js";
+import attCashPaymentsRoutes from "./Routes/attCashPaymentsRoutes.js";
 
 
 dotenv.config();
 
 const app = express();
 
+// Middlewares
 app.use(cors());
 app.use(bodyParser.json());
 
-
-app.use(
-    (req, res, next) => {
-        const tokenString = req.header("Authorization")
-        if(tokenString != null) {
-            const token = tokenString.replace("Bearer ", "")
- 
-            jwt.verify(token, process.env.JWT_KEY,
-            (err, decoded) => {
-                if(decoded != null) {
-                    req.user = decoded
-                    next()
-                } else {
-                    res.status(403).json({
-                        message : "Invalid token"
-                    })
-                }
-            })
-        } else {
-            next()
-        }
+// Auth middleware
+app.use((req, res, next) => {
+    const tokenString = req.header("Authorization");
+    if (tokenString) {
+        const token = tokenString.replace("Bearer ", "");
+        jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
+            if (decoded) {
+                req.user = decoded;
+                next();
+            } else {
+                res.status(403).json({ message: "Invalid token" });
+            }
+        });
+    } else {
+        next();
     }
-)
+});
 
-
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URL)
-.then(() => {
-    console.log("Connected to database");
-})
-.catch(() => {
-    console.log("Connection failed");
-})
+    .then(() => console.log("Connected to database"))
+    .catch(() => console.log("Connection failed"));
 
-
-
-
+// Routes
 app.use("/api/user", userRouter);
-app.use("/api/user/login", userRouter);
-app.use("/api/user/users", userRouter);
-
 app.use("/api/customer", customerRouter);
 app.use("/api/supplier", supplierRouter);
-
 app.use("/api/product", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/brand", brandRouter);
 app.use("/api/uom", uomRouter);
-
 app.use("/api/dispenser", dispenserRouter);
 app.use("/api/allocation", allocationRoutes);
-
 app.use("/api/transaction", transactionRouter);
-
 app.use("/api/attCreditInvoice", attCreditInvoiceRoutes);
+app.use("/api/cardPayment", cardPaymentsRoutes);
+app.use("/api/attCashPayment", attCashPaymentsRoutes);
 
 
+// Default 404 handler
+app.use((req, res) => {
+    res.status(404).json({ message: "Endpoint not found" });
+});
+
+// Start server
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
