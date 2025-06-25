@@ -1,9 +1,18 @@
 import mongoose from "mongoose";
 
 const allocationsSchema = new mongoose.Schema({
+    allocationId: {
+        type: String,
+        required: true,
+        unique: true
+    },
     attendantId: {
         type: String,
         required: true,
+    },
+    allocatedAt: {
+        type: Date,
+        required: true
     },
     deAllocatedAt: {
         type: Date
@@ -13,11 +22,11 @@ const allocationsSchema = new mongoose.Schema({
             dispenserId: {
                 type: String,
             },
-            allocatedAt: {
-                type: Date,
+            fuelType: {
+                type: String,
             },
             productId: {
-                type: String
+                type: String,
             },
             price: {
                 type: Number,
@@ -30,6 +39,10 @@ const allocationsSchema = new mongoose.Schema({
             }
         }
     ],
+    isDeallocated: {
+        type: Boolean,
+        default: false
+    },
     isCompleted: {
         type: Boolean,
         default: false

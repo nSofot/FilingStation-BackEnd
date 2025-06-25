@@ -38,22 +38,42 @@ export async function getPendingAttCashPayments(req, res) {
 
     try {
         const receipts = await AttCashPayments.find({ attendantId, isCompleted: false });
-
-        if (receipts.length === 0) {
-            // Optional: if admin, return all receipts
-            if (await isAdmin(req)) {
-                const allReceipts = await AttCashPayments.find({ attendantId });
-                return res.json(allReceipts);
-            }
-
-            return res.status(404).json({ message: "No pending cash payments found" });
-        }
-
-        res.json(receipts);
+        return res.json(receipts); // returns empty array if none found
     } catch (err) {
         res.status(500).json({
             message: "Error getting pending cash payments",
             error: err.message
+        });
+    }
+}
+
+
+export async function updateCashPaymentIsCompleted(req, res) {
+    if (!(await isAdmin(req))) {
+        return res.status(403).json({
+            message: "You are not authorized to update cash payments"
+        });
+    }
+
+    const receiptId = req.params.receiptId;
+
+    try {
+        const result = await AttCashPayments.updateOne(
+            { receiptId },
+            { $set: { isCompleted: true } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                message: "Cash payment not found"
+            });
+        }
+
+        res.json({ message: "Cash payment updated successfully" });
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update cash payment",
+            error: err.message || err
         });
     }
 }

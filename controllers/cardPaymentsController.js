@@ -40,27 +40,50 @@ export async function CreateAttendantCardPayments(req, res) {
 
 
 export async function getPendingAttendentCardPayments(req, res) {
-    
     const attendantId = req.params.attendantId;
 
     try {
-        const receipts = await CardPayments.find({ attendantId });
+        const receipts = await CardPayments.find({ attendantId, isCompleted: false });
 
-        if (receipts.length === 0) {
-            // Optional: if admin, return all receipts
-            if (await isAdmin(req)) {
-                const allReceipts = await CardPayments.find({ attendantId });
-                return res.json(allReceipts);
-            }
-
-            return res.status(404).json({ message: "No pending card payments found" });
-        }
-
-        res.json(receipts);
+        // Just return empty array if no receipts
+        return res.json(receipts);
     } catch (err) {
         res.status(500).json({
             message: "Error getting pending card payments",
             error: err.message
+        });
+    }
+}
+
+
+
+export async function updateCardPaymentIsCompleted(req, res) {
+    try {
+        if (!(await isAdmin(req))) {
+            return res.status(403).json({
+                message: "You are not authorized to update card payments"
+            });
+        }
+
+        const receiptId = req.params.receiptId;
+
+        const result = await CardPayments.updateOne(
+            { receiptId },
+            { $set: { isCompleted: true } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                message: "Receipt not found"
+            });
+        }
+
+        res.json({ message: "Card payment updated successfully" });
+    } catch (err) {
+        console.error("Error in updateCardPaymentIsCompleted:", err);
+        res.status(500).json({
+            message: "Failed to update card payment",
+            error: err.message || err
         });
     }
 }

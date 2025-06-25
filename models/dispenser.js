@@ -26,9 +26,6 @@ const dispenserSchema = new mongoose.Schema({
     allocatedAt: {
         type: Date, 
     },
-    openingMeter: {
-        type: Number,
-    },
     isAllocated: {
         type: Boolean,
         default: false

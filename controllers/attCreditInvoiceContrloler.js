@@ -35,39 +35,61 @@ export async function CreateInvoice(req, res) {
 
 
 export async function getPendingInvoices(req, res) {
-
     const attendantId = req.params.attendantId;
 
-    try{
-        const invoces = await AttCreditInvoice.find({attendantId : attendantId})
-        if (invoces == null) {
-            res.status(404).json({
-                message : "Pending invoices not found"
-            })
-            return
-        }
+    try {
+        // ✅ Basic query: find all pending invoices for given attendant
+        const invoices = await AttCreditInvoice.find({
+            attendantId,
+            isCompleted: false
+        });
 
-        if(invoces.isCompleted == false){
-            res.json(invoces)
-        }
-        else{
-            if(!isAdmin(req)){
-                res.status(404).json({
-                message : "Pending invoices not found"
-            })
-            return
-            }
-            else{
-                res.json(invoces)
-            }                
-        }
-    }
+        // ✅ Return empty array instead of 404
+        return res.json(invoices); // if no data, invoices = []
 
-    catch(err){
+
+    } catch (err) {
         res.status(500).json({
-            message : "Error getting pending invoices",
-            error: err
-        })
+            message: "Error getting pending invoices",
+            error: err.message || err
+        });
     }
-    
+}
+
+
+
+export async function updateCreditPaymentIsCompleted(req, res) {
+    if (!isAdmin(req)) {
+        res.status(403).json({
+            message: "You are not authorized to update credit invoices"
+        });
+        return;
+    }
+
+    const invoiceId = req.params.invoiceId;
+
+    try {
+        const result = await AttCreditInvoice.updateOne(
+            { invoiceId: invoiceId },
+            { $set: { isCompleted: true } }
+            );
+
+
+        if (result.matchedCount === 0) {
+            // No customer found with that ID
+            res.status(404).json({
+                message: "Credit invoice not found"
+            });
+            return;
+        }
+
+        res.json({
+            message: "Credit invoice updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update credit invoice",
+            error: err.message || err
+        });
+    }
 }
