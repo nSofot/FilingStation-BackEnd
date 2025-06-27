@@ -184,3 +184,37 @@ export async function updateProduct(req, res) {
     }
 }
 
+
+export async function subtractStockMultipleProducts(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "updates array is required" });
+    }
+
+    try {
+        const updatePromises = updates.map(({ productId, quantity }) => {
+            if (typeof quantity !== 'number') {
+                throw new Error(`Invalid quantity for productId ${productId}`);
+            }
+            return Product.updateOne(
+                { productId },
+                { $inc: { stock: -Math.abs(quantity) }, $set: { updatedAt: new Date() } }
+            );
+        });
+
+        await Promise.all(updatePromises);
+
+        res.json({ message: "Products stock deducted successfully" });
+    } catch (err) {
+        console.error("Bulk deduction failed:", err);
+        res.status(500).json({
+            message: "Failed to deduct product stock",
+            error: err.message || err,
+        });
+    }
+}
