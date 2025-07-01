@@ -198,3 +198,24 @@ export async function updateCompletedAllocation(req, res) {
         });
     }
 }
+
+export async function getSoldProducts(req, res) {
+    const productId = req.query?.productId?.trim();
+
+    try {
+        let query = { isDeallocated: true };
+
+        if (productId) {
+            query.dispensers = { $elemMatch: { productId } };
+        }
+
+        const allocated = await Allocations.find(query);
+
+        res.json(allocated);
+    } catch (err) {
+        res.status(500).json({
+            message: "Error getting Allocations",
+            error: err.message || err
+        });
+    }
+}

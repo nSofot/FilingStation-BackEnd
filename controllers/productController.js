@@ -185,6 +185,70 @@ export async function updateProduct(req, res) {
 }
 
 
+export async function addStockMultipleProducts(req, res) {
+  if (!isAdmin(req)) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  const { updates } = req.body;
+
+  if (!updates || !Array.isArray(updates)) {
+    return res.status(400).json({ message: "updates array is required" });
+  }
+
+  try {
+    const updatePromises = updates.map(async ({ productId, quantity, rate }) => {
+      if (typeof quantity !== 'number' || isNaN(quantity) || quantity <= 0) {
+        throw new Error(`Invalid quantity for productId ${productId}`);
+      }
+
+      if (typeof rate !== 'number' || isNaN(rate) || rate < 0) {
+        throw new Error(`Invalid rate for productId ${productId}`);
+      }
+
+      const product = await Product.findOne({ productId });
+
+      if (!product) {
+        throw new Error(`Product not found for productId ${productId}`);
+      }
+
+      const existingStock = product.stock || 0;
+      const existingAvgCost = product.avarageCost || 0;
+
+      const totalOldValue = existingStock * existingAvgCost;
+      const totalNewValue = quantity * rate;
+
+      const newStock = existingStock + quantity;
+      const newAvgCost =
+        newStock === 0 ? 0 : (totalOldValue + totalNewValue) / newStock;
+
+      return Product.updateOne(
+        { productId },
+        {
+          $set: {
+            stock: newStock,
+            avarageCost: newAvgCost,
+            updatedAt: new Date(),
+          },
+        }
+      );
+    });
+
+    await Promise.all(updatePromises);
+
+    res.json({ message: "Product stock added successfully" });
+  } catch (err) {
+    console.error("Bulk stock addition failed:", err);
+    res.status(500).json({
+      message: "Failed to add product stock",
+      error: err.message || err,
+    });
+  }
+}
+
+
+
+
 export async function subtractStockMultipleProducts(req, res) {
     if (!isAdmin(req)) {
         return res.status(403).json({ message: "Not authorized" });

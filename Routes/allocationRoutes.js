@@ -4,6 +4,7 @@ import { deAllocation } from "../controllers/allocationsController.js";
 import { getPendingAllocation } from "../controllers/allocationsController.js";
 import { getAllPendingAllocations } from "../controllers/allocationsController.js";
 import { updateCompletedAllocation } from "../controllers/allocationsController.js";
+import { getSoldProducts} from "../controllers/allocationsController.js";
 
     
 const allocationRoutes = express.Router();
@@ -11,6 +12,7 @@ const allocationRoutes = express.Router();
 
 allocationRoutes.post("/", addAllocation);
 allocationRoutes.put("/:allocationId", deAllocation);
+allocationRoutes.get("/products", getSoldProducts);
 allocationRoutes.get("/", getAllPendingAllocations);
 allocationRoutes.get("/:attendantId", getPendingAllocation);
 allocationRoutes.put("/complete/:allocationId", updateCompletedAllocation);

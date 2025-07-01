@@ -192,3 +192,83 @@ export async function searchCustomers(req, res) {
 		});
 	}
 }
+
+
+export async function addCustomerBalance(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "updates array is required" });
+    }
+
+    try {
+        const updatePromises = updates.map(({ customerId, amount }) => {
+            if (typeof amount !== 'number') {
+                throw new Error(`Invalid amount for customerId ${customerId}`);
+            }
+
+            return Customer.updateOne(
+                { customerId },
+                {
+                    $inc: { balance: Math.abs(amount) }, // assuming positive increment
+                    $set: { updatedAt: new Date() },
+                }
+            );
+        });
+
+        await Promise.all(updatePromises);
+
+        res.json({ message: "Customer balances added successfully" });
+    } catch (err) {
+        console.error("Bulk addition failed:", err);
+        res.status(500).json({
+            message: "Failed to add customer balance",
+            error: err.message || err,
+        });
+    }
+}
+
+
+export async function subtractCustomerBalance(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "updates array is required" });
+    }
+
+    try {
+        const updatePromises = updates.map(({ customerId, amount }) => {
+            if (!customerId || typeof amount !== 'number') {
+                throw new Error(`Invalid data for customerId: ${customerId}`);
+            }
+
+            return Customer.updateOne(
+                { customerId },
+                {
+                    $inc: { balance: -Math.abs(amount) }, // subtracting as negative increment
+                    $set: { updatedAt: new Date() },
+                }
+            );
+        });
+
+        await Promise.all(updatePromises);
+
+        res.json({ message: "Customer balances subtracted successfully" });
+    } catch (err) {
+        console.error("Balance subtraction failed:", err);
+        res.status(500).json({
+            message: "Failed to subtract customer balance",
+            error: err.message || err,
+        });
+    }
+}
+
+
