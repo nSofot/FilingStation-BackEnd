@@ -46,6 +46,10 @@ const attCreditInvoiceSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    dueAmount: {
+        type: Number,
+        default: 0
+    },
     isCompleted: {
         type: Boolean,
         default: false
