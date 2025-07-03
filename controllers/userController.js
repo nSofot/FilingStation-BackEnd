@@ -69,6 +69,7 @@ export async function createUser(req, res) {
     }
 }
 
+
 // Login User
 export async function loginUsers(req, res) {
     const { email, password } = req.body;
@@ -149,6 +150,7 @@ export async function updateUser(req, res) {
     }
 }
 
+
 // Get All Users
 export async function getUsers(req, res) {
     if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
@@ -158,6 +160,20 @@ export async function getUsers(req, res) {
         res.json(users);
     } catch (err) {
         res.status(500).json({ message: "Failed to fetch users", error: err.message });
+    }
+}
+
+
+export function getUser(req,res){
+    if(req.user == null){
+        res.status(403).json({
+            message: "You are not authorized to view user details"
+        })
+        return
+    }else{
+        res.json({
+            ...req.user
+        })
     }
 }
 
