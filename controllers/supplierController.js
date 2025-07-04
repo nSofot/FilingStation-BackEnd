@@ -52,6 +52,44 @@ export async function getSupplier(req,res) {
     }
 }
 
+
+export async function getSupplierById(req, res) {
+    const supplierId = req.params.supplierId
+
+    try{
+        const supplier = await Supplier.findOne({supplierId : supplierId})
+        if (supplier == null) {
+            res.status(404).json({
+                message : "Supplier not found"
+            })
+            return
+        }
+
+        if(supplier.isActive == true){
+            res.json(supplier)
+        }
+        else{
+            if(!isAdmin(req)){
+                res.status(404).json({
+                message : "Supplier not found"
+            })
+            return
+            }
+            else{
+                res.json(supplier)
+            }                
+        }
+    }
+
+    catch(err){
+        res.status(500).json({
+            message : "Error getting supplier",
+            error: err
+        })
+    }
+}
+
+
 export async function deleteSupplier(req, res) {
     if(!isAdmin(req))
     {
@@ -113,6 +151,35 @@ export async function updateSupplier(req, res) {
         res.status(500).json({
             message: "Failed to update supplier",
             error: err.message || err
+        });
+    }
+}
+
+
+export async function searchSuppliers(req, res) {
+    const searchQuery = req.query.query || "";
+
+    try {
+        const regex = { $regex: searchQuery, $options: "i" };
+
+        const filter = {
+            isActive: true,
+            ...(searchQuery.trim() !== "" && {
+                $or: [
+                    { name: regex },
+                    { address: regex },
+                    { mobile: regex },
+                    { phone: regex } 
+                ]
+            })
+        };
+
+        const suppliers = await Supplier.find(filter);
+        res.json(suppliers);
+    } catch (err) {
+        res.status(500).json({
+            message: "Error searching suppliers",
+            error: err
         });
     }
 }
