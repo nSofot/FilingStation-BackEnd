@@ -77,3 +77,29 @@ export async function updateCashPaymentIsCompleted(req, res) {
         });
     }
 }
+
+
+/**
+ * GET /api/attCashPayment/:attendantId/latest
+ * Returns the newest cash‑payment document for the given attendant.
+ */
+export async function getLatestAttReceipt(req, res) {
+    const { attendantId } = req.params;
+
+    try {
+        const latest = await AttCashPayments.findOne({ attendantId })
+        .sort({ createdAt: -1 })
+        .lean();                       // send plain JSON, not a Mongoose doc
+
+        if (!latest) {
+            return res.status(404).json({ message: "No receipts for this attendant" });
+        }
+
+        res.json(latest);
+    } catch (err) {
+        console.error("Error fetching latest receipt:", err);
+        res.status(500).json({ message: "Server error while fetching receipt" });
+    }
+}
+
+

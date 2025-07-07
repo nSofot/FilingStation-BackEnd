@@ -19,6 +19,8 @@ import allocationRoutes from "./Routes/allocationRoutes.js";
 import attCreditInvoiceRoutes from "./Routes/attCreditInvoiceRoutes.js";
 import cardPaymentsRoutes from "./Routes/cardPaymentsRoutes.js";
 import attCashPaymentsRoutes from "./Routes/attCashPaymentsRoutes.js";
+import ledgerAccountRouter from "./Routes/ledgerAccountRoutes.js";
+import accountTransactionsRoutes from "./Routes/accountTransactionsRoutes.js";
 
 
 dotenv.config();
@@ -66,6 +68,8 @@ app.use("/api/grn", grnRoutes);
 app.use("/api/attCreditInvoice", attCreditInvoiceRoutes);
 app.use("/api/cardPayment", cardPaymentsRoutes);
 app.use("/api/attCashPayment", attCashPaymentsRoutes);
+app.use("/api/accounts", ledgerAccountRouter);
+app.use("/api/transactions", accountTransactionsRoutes);
 
 
 // Default 404 handler
