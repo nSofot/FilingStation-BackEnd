@@ -10,12 +10,12 @@ export async function CreateAttCashPayments(req, res) {
         }
 
         // Generate next receipt ID
-        let receiptId = "REC-A-000001";
+        let receiptId = "RCPT-A-000001";
         const lastReceipt = await AttCashPayments.findOne().sort({ createdAt: -1 });
 
         if (lastReceipt) {
-            const lastId = parseInt(lastReceipt.receiptId.replace("REC-A-", ""));
-            receiptId = "REC-A-" + String(lastId + 1).padStart(6, "0");
+            const lastId = parseInt(lastReceipt.receiptId.replace("RCPT-A-", ""));
+            receiptId = "RCPT-A-" + String(lastId + 1).padStart(6, "0");
         }
 
         req.body.receiptId = receiptId;

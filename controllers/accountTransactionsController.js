@@ -30,44 +30,70 @@ export async function getAccountTransactionById(req, res) {
 }
 
 
-export async function createAccountTransaction(req, res) {
-    try {
-        // Check if user is admin
-        const admin = await isAdmin(req);
-        if (!admin) {
-            return res.status(403).json({ message: "Unauthorized access" });
+    export async function createAccountTransaction(req, res) {
+console.log(req.body);        
+        try {
+            const admin = await isAdmin(req);
+            if (!admin) {
+                return res.status(403).json({ message: "Unauthorized access" });
+            }
+
+            const { trxId, accountId, trxDate, description, trxType, trxAmount } = req.body;
+
+            if (!trxId || !accountId || !trxDate || !description || !trxType || trxAmount == null) {
+                return res.status(400).json({ message: "Missing required fields" });
+            }
+
+            // Convert trxDate string to Date object if necessary
+            const trxDateObj = new Date(trxDate);
+            if (isNaN(trxDateObj)) {
+                return res.status(400).json({ message: "Invalid transaction date" });
+            }
+
+            // Check for duplicate trxId
+            // const existing = await AccountTransactions.findOne({ trxId });
+            // if (existing) {
+            //     return res.status(409).json({ message: "Transaction ID already exists" });
+            // }
+
+            const accountTransaction = new AccountTransactions({
+                trxId,
+                accountId,
+                trxDate: trxDateObj,
+                description,
+                trxType,
+                trxAmount,
+                createdBy: req.user?.id || "system", // add user id if available
+            });
+
+            await accountTransaction.save();
+
+            res.status(201).json({
+            message: "Account transaction created",
+            transaction: accountTransaction,
+            });
+        } catch (err) {
+            console.error("Error creating account transaction:", err);
+            res.status(500).json({
+            message: "Failed to create account transaction",
+            error: err.message,
+            });
         }
-
-        // Save transaction
-        const accountTransaction = new AccountTransactions(req.body);
-        await accountTransaction.save();
-
-        // Respond with success and created transaction
-        res.status(201).json({ 
-            message: "Account transaction created", 
-            transaction: accountTransaction 
-        });
-    } catch (err) {
-        console.error("Error creating account transaction:", err);
-        res.status(500).json({ 
-            message: "Failed to create account transaction", 
-            error: err.message 
-        });
     }
-}   
+ 
 
 export async function updateAccountTransaction(req, res) {
     if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
 
     try {
         const { transactionId } = req.params;
-        const result = await AccountTransactions.updateOne({ transactionId }, req.body);
+        const updated = await AccountTransactions.findByIdAndUpdate(transactionId, req.body, { new: true });
 
-        if (result.matchedCount === 0) {
+        if (!updated) {
             return res.status(404).json({ message: "Account transaction not found" });
         }
 
-        res.json({ message: "Account transaction updated successfully" });
+        res.json({ message: "Account transaction updated successfully", updated });
     } catch (err) {
         res.status(500).json({ message: "Failed to update account transaction", error: err.message });
     }
@@ -78,9 +104,9 @@ export async function deleteAccountTransaction(req, res) {
 
     try {
         const { transactionId } = req.params;
-        const result = await AccountTransactions.deleteOne({ transactionId });
+        const deleted = await AccountTransactions.findByIdAndDelete(transactionId);
 
-        if (result.deletedCount === 0) {
+        if (!deleted) {
             return res.status(404).json({ message: "Account transaction not found" });
         }
 

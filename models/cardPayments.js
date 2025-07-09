@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const cardPaymentsSchema = new mongoose.Schema({
+    referenceId: {
+        type: String,
+        required: true,
+        unique: true
+    },
     receiptId: {
         type: String,
         required: true,
@@ -8,7 +13,6 @@ const cardPaymentsSchema = new mongoose.Schema({
     },
     attendantId: {
         type: String,
-        required: true
     },
     receiptDate: {
         type: Date,
@@ -20,7 +24,6 @@ const cardPaymentsSchema = new mongoose.Schema({
     },
     referenceNumber: {
         type: String,
-        required: false,
     },
     receiptAmount: {
         type: Number,

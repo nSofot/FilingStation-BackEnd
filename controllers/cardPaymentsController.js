@@ -4,38 +4,48 @@ import CardPayments from "../models/cardPayments.js";
 
 export async function CreateAttendantCardPayments(req, res) {
     try {
+        // Admin check
         if (!(await isAdmin(req))) {
             return res.status(403).json({ message: "You are not authorized to add card payments" });
         }
 
-        const { attendantId, receiptDate, cardType, receiptAmount } = req.body;
-        if (!attendantId || !receiptDate || !cardType || !receiptAmount) {
+        // Destructure & validate required fields
+        const { attendantId, receiptDate, cardType, receiptAmount, receiptId } = req.body;
+
+        if (!attendantId || !receiptDate || !cardType || receiptAmount == null || !receiptId) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
-        let receiptId = "CRD-000001";
+
+        // Generate next reference ID
+        let referenceId = "CRD-000001";
         const lastReceipt = await CardPayments.findOne().sort({ createdAt: -1 });
 
-        if (lastReceipt) {
-            const lastId = parseInt(lastReceipt.receiptId.replace("CRD-", ""));
-            receiptId = "CRD-" + String(lastId + 1).padStart(6, "0");
+        if (lastReceipt?.referenceId?.startsWith("CRD-")) {
+            const lastId = parseInt(lastReceipt.referenceId.replace("CRD-", ""), 10);
+            if (!isNaN(lastId)) {
+                referenceId = "CRD-" + String(lastId + 1).padStart(6, "0");
+            }
         }
 
-        req.body.receiptId = receiptId;
+        // Set reference ID
+        req.body.referenceId = referenceId;
 
+        // Create and save new record
         const receipt = new CardPayments(req.body);
         await receipt.save();
 
         res.status(201).json({ message: "Receipt created successfully", receipt });
 
     } catch (err) {
-        console.error("Error creating receipt:", err);
+        console.error("Error creating card payment receipt:", err);
         res.status(500).json({
-            message: "Failed to create receipt",
+            message: "Failed to create card payment receipt",
             error: err.message
         });
     }
 }
+
 
 
 

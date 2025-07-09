@@ -4,7 +4,7 @@ const accountTransactionsSchema = new mongoose.Schema({
     trxId: {
         type: String,
         required: true,
-        unique: true
+        unique: false
     },
     trxDate: {
         type: Date,
@@ -13,7 +13,6 @@ const accountTransactionsSchema = new mongoose.Schema({
     accountId: {
         type: String,
         required: true
-        // unique removed here
     },
     description: {
         type: String,

@@ -21,6 +21,8 @@ import cardPaymentsRoutes from "./Routes/cardPaymentsRoutes.js";
 import attCashPaymentsRoutes from "./Routes/attCashPaymentsRoutes.js";
 import ledgerAccountRouter from "./Routes/ledgerAccountRoutes.js";
 import accountTransactionsRoutes from "./Routes/accountTransactionsRoutes.js";
+import customerReceiptRoutes from "./Routes/customerReceiptRoutes.js";
+import chequeBookInwardRoutes from "./Routes/chequeBookInwardRoutes.js";
 
 
 dotenv.config();
@@ -70,6 +72,8 @@ app.use("/api/cardPayment", cardPaymentsRoutes);
 app.use("/api/attCashPayment", attCashPaymentsRoutes);
 app.use("/api/accounts", ledgerAccountRouter);
 app.use("/api/transactions", accountTransactionsRoutes);
+app.use("/api/customerReceipt", customerReceiptRoutes);
+app.use("/api/chequeBookInward", chequeBookInwardRoutes);
 
 
 // Default 404 handler
@@ -78,6 +82,8 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
+
