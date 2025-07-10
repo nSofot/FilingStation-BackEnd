@@ -9,31 +9,37 @@ export async function CreateAttendantCardPayments(req, res) {
             return res.status(403).json({ message: "You are not authorized to add card payments" });
         }
 
-        // Destructure & validate required fields
+        // Validate required fields
         const { attendantId, receiptDate, cardType, receiptAmount, receiptId } = req.body;
-
         if (!attendantId || !receiptDate || !cardType || receiptAmount == null || !receiptId) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
-
         // Generate next reference ID
-        let referenceId = "CRD-000001";
+        let referenceId = "CARD-0000001";
         const lastReceipt = await CardPayments.findOne().sort({ createdAt: -1 });
 
-        if (lastReceipt?.referenceId?.startsWith("CRD-")) {
-            const lastId = parseInt(lastReceipt.referenceId.replace("CRD-", ""), 10);
+        if (lastReceipt?.referenceId?.startsWith("CARD-")) {
+            const lastId = parseInt(lastReceipt.referenceId.replace("CARD-", ""), 10); // ✅ fixed
             if (!isNaN(lastId)) {
-                referenceId = "CRD-" + String(lastId + 1).padStart(6, "0");
+                referenceId = "CARD-" + String(lastId + 1).padStart(7, "0");
             }
         }
 
-        // Set reference ID
         req.body.referenceId = referenceId;
 
-        // Create and save new record
-        const receipt = new CardPayments(req.body);
-        await receipt.save();
+        // Save card payment
+        let receipt;
+        try {
+            receipt = new CardPayments(req.body);
+            await receipt.save();
+        } catch (saveError) {
+            console.error("🛑 Mongoose Save Error:", saveError.message, saveError.errors);
+            return res.status(500).json({
+                message: "Database save failed",
+                error: saveError.message
+            });
+        }
 
         res.status(201).json({ message: "Receipt created successfully", receipt });
 
@@ -45,6 +51,7 @@ export async function CreateAttendantCardPayments(req, res) {
         });
     }
 }
+
 
 
 
@@ -95,5 +102,20 @@ export async function updateCardPaymentIsCompleted(req, res) {
             message: "Failed to update card payment",
             error: err.message || err
         });
+    }
+}
+
+
+export async function getAllCardPaymentVouchers(req, res) {
+    try{
+        const cardVouchers = await CardPayments.find()
+        res.json(cardVouchers)
+
+    }
+    catch(err){
+        res.status(500).json({
+            message : "Error getting card payment vouchers",
+            error: err
+        })
     }
 }

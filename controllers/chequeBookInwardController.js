@@ -39,6 +39,27 @@ export async function getInwardChequeByChequeNo(req, res) {
     }
 }
 
+
+export async function getChequesByStatus(req, res) {
+    // Optional: Add admin access control
+    // if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
+    try {
+        const { status } = req.params;
+
+        if (!status) {
+            return res.status(400).json({ message: "Cheque status is required" });
+        }
+
+        const cheques = await ChequeBookInward.find({ chequeStatus: status.trim() });
+
+        res.status(200).json(cheques);
+    } catch (err) {
+        console.error("Error fetching cheques by status:", err);
+        res.status(500).json({ message: "Failed to fetch cheques", error: err.message });
+    }
+}
+
+
 export async function updateInwardChequeStatus(req, res) {
     if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
 

@@ -9,7 +9,6 @@ const cardPaymentsSchema = new mongoose.Schema({
     receiptId: {
         type: String,
         required: true,
-        unique: true
     },
     attendantId: {
         type: String,
