@@ -107,3 +107,24 @@ export async function deleteGrn(req, res) {
         })
     }
 }
+
+export async function getLatestGRN(req, res) {
+    if (!(await isAdmin(req))) {
+        return res.status(403).json({ message: "You are not authorized to get GRN" });
+    }
+
+    try {
+        const latest = await Grn.findOne()
+            .sort({ createdAt: -1 })
+            .lean();
+
+        if (!latest) {
+            return res.status(404).json({ message: "No GRN found" });
+        }
+
+        res.status(200).json(latest);
+    } catch (err) {
+        console.error("Error fetching latest GRN:", err);
+        res.status(500).json({ message: "Server error while fetching GRN" });
+    }
+}

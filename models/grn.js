@@ -20,22 +20,6 @@ const grnSchema = new mongoose.Schema({
     totalAmount: {
         type: Number
     },
-    itemDetails: [
-        {
-            productId: {
-                type: String,
-                required: true
-            },
-            quantity: {
-                type: Number,
-                required: true
-            },
-            price: {
-                type: Number,
-                required: true
-            }
-        }
-    ],
     isCompleted: {
         type: Boolean,
         default: false

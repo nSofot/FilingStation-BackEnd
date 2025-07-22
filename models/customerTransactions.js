@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-const customerTransactionSchema = new mongoose.Schema({
+const customerTransactionsSchema = new mongoose.Schema({
     customerId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         ref: 'Customer' // Assuming you have a Customer model
     },  
@@ -30,17 +30,20 @@ const customerTransactionSchema = new mongoose.Schema({
         required: true
     },
     relatedInvoiceId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'CustomerTransaction' // Assuming you have an Invoice model
+        type: String,
+        ref: 'CustomerTransactions' // Assuming you have an Invoice model
     },
     description: {
         type: String,
         trim: true
     },
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User', // Assuming you have a User model
         required: true
+    },
+    dueAmount: {
+        type: Number
     },
     createdAt: {
         type: Date,
@@ -53,6 +56,6 @@ const customerTransactionSchema = new mongoose.Schema({
     }
 });
 
-const CustomerTransaction = mongoose.model("CustomerTransaction", customerTransactionSchema);
+const CustomerTransactions = mongoose.model("CustomerTransactions", customerTransactionsSchema);
 
-export default CustomerTransaction;
+export default CustomerTransactions;

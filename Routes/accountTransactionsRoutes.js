@@ -6,15 +6,15 @@ import { deleteAccountTransaction } from "../controllers/accountTransactionsCont
 import { getAccountTransactionById } from "../controllers/accountTransactionsController.js";
 
 
-const accountTransactionsRoutes = express.Router();
+const accountTransactionsRouter = express.Router();
 
 
-accountTransactionsRoutes.get("/", getAccountTransactions);
-accountTransactionsRoutes.get("/:accountId", getAccountTransactionById);
-accountTransactionsRoutes.post("/", createAccountTransaction);
-accountTransactionsRoutes.put("/:transactionId", updateAccountTransaction);
-accountTransactionsRoutes.delete("/:transactionId", deleteAccountTransaction);
+accountTransactionsRouter.get("/", getAccountTransactions);
+accountTransactionsRouter.get("/:accountId", getAccountTransactionById);
+accountTransactionsRouter.post("/", createAccountTransaction);
+accountTransactionsRouter.put("/:transactionId", updateAccountTransaction);
+accountTransactionsRouter.delete("/:transactionId", deleteAccountTransaction);
 
 
 
-export default accountTransactionsRoutes;
+export default accountTransactionsRouter;
