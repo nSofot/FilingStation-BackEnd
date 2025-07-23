@@ -29,8 +29,12 @@ const accountTransactionsSchema = new mongoose.Schema({
     },
     createdBy: {
         type: String
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-}, { timestamps: true });  // adds createdAt and updatedAt automatically
+});
 
 const AccountTransactions = mongoose.model("AccountTransactions", accountTransactionsSchema);
 

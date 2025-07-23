@@ -20,7 +20,10 @@ import attCreditInvoiceRoutes from "./Routes/attCreditInvoiceRoutes.js";
 import cardPaymentsRoutes from "./Routes/cardPaymentsRoutes.js";
 import attCashPaymentsRoutes from "./Routes/attCashPaymentsRoutes.js";
 import ledgerAccountRouter from "./Routes/ledgerAccountRoutes.js";
-import accountTransactionsRoutes from "./Routes/accountTransactionsRoutes.js";
+import customerTransactionsRouter from "./Routes/customerTransactionsRoutes.js";
+import supplierTransactionsRouter from "./Routes/supplierTransactionsRoutes.js";
+import productTransactionsRouter from "./Routes/productTransactionsRoutes.js";
+import accountTransactionsRouter from "./Routes/accountTransactionsRoutes.js";
 import customerReceiptRoutes from "./Routes/customerReceiptRoutes.js";
 import chequeBookInwardRoutes from "./Routes/chequeBookInwardRoutes.js";
 
@@ -71,7 +74,10 @@ app.use("/api/attCreditInvoice", attCreditInvoiceRoutes);
 app.use("/api/cardPayment", cardPaymentsRoutes);
 app.use("/api/attCashPayment", attCashPaymentsRoutes);
 app.use("/api/accounts", ledgerAccountRouter);
-app.use("/api/transactions", accountTransactionsRoutes);
+app.use("/api/customerTransactions", customerTransactionsRouter);
+app.use("/api/supplierTransactions", supplierTransactionsRouter);
+app.use("/api/productTransactions", productTransactionsRouter);
+app.use("/api/accountTransactions", accountTransactionsRouter);
 app.use("/api/customerReceipt", customerReceiptRoutes);
 app.use("/api/chequeBookInward", chequeBookInwardRoutes);
 
