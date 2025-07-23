@@ -189,7 +189,7 @@ export async function addStockMultipleProducts(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Not authorized" });
   }
-console.log(req.body)
+
   const { updates } = req.body;
 
   if (!updates || !Array.isArray(updates)) {
