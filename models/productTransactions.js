@@ -7,11 +7,16 @@ const productTransactionsSchema = new mongoose.Schema({
     },
     transactionType: {
         type: String,
-        required: true
+        required: true,
+        enum: ['invoice', 'grn', 'adjustment'],
     },
     transactionDate: {
         type: Date,
         required: true
+    },
+    description: {
+        type: String,
+        default: ""
     },
     isAdded: {
         type: Boolean,
