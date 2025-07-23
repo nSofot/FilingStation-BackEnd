@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const supplierTransactionSchema = new mongoose.Schema({
+const supplierTransactionsSchema = new mongoose.Schema({
     supplierId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -31,7 +31,7 @@ const supplierTransactionSchema = new mongoose.Schema({
     },
     relatedInvoiceId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'SupplierTransaction' // Assuming you have an Invoice model
+        ref: 'SupplierTransactions' // Assuming you have an Invoice model
     },
     description: {
         type: String,
@@ -53,6 +53,6 @@ const supplierTransactionSchema = new mongoose.Schema({
     }
 });
 
-const SupplierTransaction = mongoose.model("SupplierTransaction", supplierTransactionSchema);
+const SupplierTransactions = mongoose.model("SupplierTransactions", supplierTransactionsSchema);
 
-export default SupplierTransaction;
+export default SupplierTransactions;
