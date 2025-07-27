@@ -25,19 +25,19 @@ export async function getAllInwardCheques(req, res) {
 }
 
 export async function getInwardChequeByChequeNo(req, res) {
-    if (!isAdmin(req)) return res.status(403).json({ message: "Unauthorized access" });
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Unauthorized access" });
+    }
 
     try {
         const { chequeNumber } = req.params;
-        const cheque = await ChequeBookInward.findOne({ chequeNumber });
-        if (!cheque) {
-            return res.status(404).json({ message: "Cheque not found" });
-        }
+        const cheque = await ChequeBookInward.findOne({ chequeNumber: chequeNumber.trim() });
         res.json(cheque);
     } catch (err) {
         res.status(500).json({ message: "Failed to fetch cheque", error: err.message });
     }
 }
+
 
 
 export async function getChequesByStatus(req, res) {

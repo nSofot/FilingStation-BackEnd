@@ -30,15 +30,14 @@ export async function getAccountTransactionById(req, res) {
 }
 
 
-    export async function createAccountTransaction(req, res) {
-console.log(req.body);        
+    export async function createAccountTransaction(req, res) {      
         try {
             const admin = await isAdmin(req);
             if (!admin) {
                 return res.status(403).json({ message: "Unauthorized access" });
             }
 
-            const { trxId, accountId, trxDate, description, trxType, trxAmount } = req.body;
+            const { trxId, accountId, trxDate, description, transactionType, trxType, trxAmount } = req.body;
 
             if (!trxId || !accountId || !trxDate || !description || !trxType || trxAmount == null) {
                 return res.status(400).json({ message: "Missing required fields" });
@@ -60,6 +59,8 @@ console.log(req.body);
                 trxId,
                 accountId,
                 trxDate: trxDateObj,
+                transactionType,
+                accountId,
                 description,
                 trxType,
                 trxAmount,

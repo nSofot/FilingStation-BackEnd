@@ -7,15 +7,6 @@ export async function CreateInvoice(req, res) {
         if (!(await isAdmin(req))) {
             return res.status(403).json({ message: "You are not authorized to add invoice" });
         }
-        // Generate next invoice ID
-        // let invoiceId = "INV-A-000001";
-        // const lastInvoice = await AttCreditInvoice.findOne().sort({ createdAt: -1 });
-        // if (lastInvoice) {
-        //     const lastId = parseInt(lastInvoice.invoiceId.replace("INV-A-", ""));
-        //     invoiceId = "INV-A-" + String(lastId + 1).padStart(6, "0");
-        // }
-        // Create and save new invoice
-        // req.body.invoiceId = invoiceId;
         const invoice = new AttCreditInvoice(req.body);
         await invoice.save();
         res.status(201).json({ message: "Invoice created successfully", invoice });
