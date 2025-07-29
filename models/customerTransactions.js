@@ -7,7 +7,7 @@ const customerTransactionsSchema = new mongoose.Schema({
     },  
     transactionType: {
         type: String,
-        enum: ['invoice', 'receipt', 'credit_note', 'debit_note'],
+        enum: ['invoice', 'receipt', 'credit_note', 'debit_note', 'payment', 'adjustment'],
         required: true
     },
     referenceNumber: {

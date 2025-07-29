@@ -139,10 +139,6 @@ export async function getCustomerPendingTransactionByCustomerId(req, res) {
             dueAmount: { $gt: 0 }
         });
 
-        if (transactions.length === 0) {
-            return res.status(404).json({ message: "No pending transactions found for this customer" });
-        }
-
         res.json(transactions);
     } catch (err) {
         console.error("Error fetching pending transactions:", err);
