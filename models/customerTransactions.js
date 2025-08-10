@@ -4,11 +4,10 @@ const customerTransactionsSchema = new mongoose.Schema({
     customerId: {
         type: String,
         required: true,
-        ref: 'Customer' // Assuming you have a Customer model
     },  
     transactionType: {
         type: String,
-        enum: ['invoice', 'receipt', 'credit_note', 'debit_note'],
+        enum: ['invoice', 'receipt', 'credit_note', 'debit_note', 'payment', 'adjustment'],
         required: true
     },
     referenceNumber: {
@@ -29,8 +28,9 @@ const customerTransactionsSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-    relatedInvoiceId: {
-        type: String,
+    relatedTransactionIds: {
+        type: [String],
+        default: [],
         ref: 'CustomerTransactions' // Assuming you have an Invoice model
     },
     description: {
@@ -39,8 +39,7 @@ const customerTransactionsSchema = new mongoose.Schema({
     },
     createdBy: {
         type: String,
-        ref: 'User', // Assuming you have a User model
-        required: true
+        default: null
     },
     dueAmount: {
         type: Number

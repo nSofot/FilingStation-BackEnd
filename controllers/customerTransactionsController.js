@@ -79,6 +79,39 @@ export async function getLatestCustomerTransaction(req, res) {
 }
 
 
+export async function updateOverdueTransactions(req, res) {
+    const referenceNumber = req.params.referenceNumber;
+    const paidAmount = parseFloat(req.body.paidAmount);
+
+    if (isNaN(paidAmount) || paidAmount <= 0) {
+        return res.status(400).json({ message: "Invalid paid amount." });
+    }
+
+    try {
+        const invoice = await CustomerTransactions.findOne({ referenceNumber });
+
+        if (!invoice) {
+            return res.status(404).json({ message: "Credit transction not found." });
+        }
+
+        const newDueAmount = parseFloat(invoice.dueAmount) - paidAmount;
+
+        invoice.dueAmount = newDueAmount >= 0 ? newDueAmount : 0;
+        await invoice.save();
+
+        return res.status(200).json({
+            message: "Due amount updated successfully.",
+            updatedDueAmount: invoice.dueAmount
+        });
+    } catch (err) {
+        console.error("Error updating credit invoice due amount:", err);
+        return res.status(500).json({
+            message: "Internal server error while updating due amount."
+        });
+    }
+}
+
+
 export async function getCustomerTransactionByCustomerId(req, res) {
     const { customerId } = req.params;
 
@@ -105,10 +138,6 @@ export async function getCustomerPendingTransactionByCustomerId(req, res) {
             isCredit: false,
             dueAmount: { $gt: 0 }
         });
-
-        if (transactions.length === 0) {
-            return res.status(404).json({ message: "No pending transactions found for this customer" });
-        }
 
         res.json(transactions);
     } catch (err) {

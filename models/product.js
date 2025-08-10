@@ -39,6 +39,10 @@ const productSchema = new mongoose.Schema({
     reOrderLevel: {
         type: Number,
     },
+    reOrderQuantity: {
+        type: Number,
+        default: 0
+    },
     maxStockLevel: {
         type: Number
     },

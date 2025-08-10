@@ -3,7 +3,8 @@ import {
         addCustomerTransaction,
         getLatestCustomerTransaction,
         getCustomerTransactionByCustomerId,
-        getCustomerPendingTransactionByCustomerId
+        getCustomerPendingTransactionByCustomerId,
+        updateOverdueTransactions
     } from "../controllers/customerTransactionsController.js";
 
 const customerTransactionsRouter = express.Router();
@@ -13,6 +14,7 @@ customerTransactionsRouter.get("/pending/:customerId", getCustomerPendingTransac
 customerTransactionsRouter.get("/customer/:customerId", getCustomerTransactionByCustomerId);
 customerTransactionsRouter.get("/latest/:transactionType", getLatestCustomerTransaction);
 customerTransactionsRouter.post("/", addCustomerTransaction);
+customerTransactionsRouter.put("/overdue/:referenceNumber/pay", updateOverdueTransactions);
 // router.put("/:transactionId", customerTransactionsController.updateCustomerTransaction);
 // router.delete("/:transactionId", customerTransactionsController.deleteCustomerTransaction);
 
