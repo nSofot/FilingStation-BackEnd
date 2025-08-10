@@ -13,6 +13,6 @@ router.post("/", addInwardCheque);
 router.get("/", getAllInwardCheques);
 router.get("/:chequeNumber", getInwardChequeByChequeNo);
 router.get("/status/:status", getChequesByStatus);
-router.put("/:chequeNumber", updateInwardChequeStatus);
+router.put("/status/:chequeNumber", updateInwardChequeStatus);
 
 export default router;

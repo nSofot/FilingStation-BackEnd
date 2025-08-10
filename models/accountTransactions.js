@@ -10,6 +10,11 @@ const accountTransactionsSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    transactionType: {
+        type: String,
+        required: true,
+        enum: ['invoice', 'receipt'],
+    },
     accountId: {
         type: String,
         required: true
@@ -28,7 +33,8 @@ const accountTransactionsSchema = new mongoose.Schema({
         default: 0
     },
     createdBy: {
-        type: String
+        type: String,
+        default: ""
     },
     createdAt: {
         type: Date,
