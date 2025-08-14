@@ -24,7 +24,6 @@ import customerTransactionsRouter from "./Routes/customerTransactionsRoutes.js";
 import supplierTransactionsRouter from "./Routes/supplierTransactionsRoutes.js";
 import productTransactionsRouter from "./Routes/productTransactionsRoutes.js";
 import accountTransactionsRouter from "./Routes/accountTransactionsRoutes.js";
-// import customerReceiptRoutes from "./Routes/customerReceiptRoutes.js";
 import chequeBookInwardRoutes from "./Routes/chequeBookInwardRoutes.js";
 
 

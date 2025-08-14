@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const supplierTransactionsSchema = new mongoose.Schema({
     supplierId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         ref: 'Supplier' // Assuming you have a Supplier model
     },  
@@ -25,13 +25,17 @@ const supplierTransactionsSchema = new mongoose.Schema({
         required: true,
         min: [0, 'Amount must be positive']
     },
+    dueAmount: {
+        type: Number,
+        min: [0, 'Amount must be positive']
+    },
     isCredit: {
         type: Boolean,
         required: true
     },
     relatedInvoiceId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SupplierTransactions' // Assuming you have an Invoice model
+        type: String,
+        default: ""
     },
     description: {
         type: String,
@@ -39,8 +43,7 @@ const supplierTransactionsSchema = new mongoose.Schema({
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Assuming you have a User model
-        required: true
+        ref: 'User'
     },
     createdAt: {
         type: Date,
@@ -48,8 +51,7 @@ const supplierTransactionsSchema = new mongoose.Schema({
     },
     updatedAt: {
         type: Date,
-        default: Date.now,
-        required: true
+        default: Date.now
     }
 });
 
