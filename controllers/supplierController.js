@@ -183,3 +183,99 @@ export async function searchSuppliers(req, res) {
         });
     }
 }
+
+
+export async function addSupplierBalance(req, res) {    
+  
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "updates array is required" });
+    }
+
+    // Validate first
+    const invalidEntries = updates.filter(
+        ({ supplierId, amount }) => !supplierId || typeof amount !== 'number'
+    );
+    if (invalidEntries.length > 0) {
+        return res.status(400).json({
+            message: "Invalid supplier updates",
+            invalidEntries
+        });
+    }
+
+    try {
+        const results = await Promise.allSettled(
+            updates.map(({ supplierId, amount }) =>
+                Supplier.updateOne(
+                    { supplierId },
+                    {
+                        $inc: { balance: amount }, // can be positive or negative
+                        $set: { updatedAt: new Date() }
+                    }
+                )
+            )
+        );
+
+        const failed = results
+            .map((res, i) => res.status === 'rejected' ? updates[i].supplierId : null)
+            .filter(Boolean);
+
+        res.json({
+            message: failed.length === 0
+                ? "Supplier balances updated successfully"
+                : "Some supplier updates failed",
+            failedSuppliers: failed
+        });
+    } catch (err) {
+        console.error("Bulk addition failed:", err);
+        res.status(500).json({
+            message: "Failed to update supplier balances",
+            error: err.message || err
+        });
+    }
+}
+
+
+export async function subtractSupplierBalance(req, res) {
+    if (!isAdmin(req)) {
+        return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "updates array is required" });
+    }
+
+    try {
+        const updatePromises = updates.map(({ supplierId, amount }) => {
+            if (!customerId || typeof amount !== 'number') {
+                throw new Error(`Invalid data for supplierId: ${supplierId}`);
+            }
+
+            return Supplier.updateOne(
+                { supplierId },
+                {
+                    $inc: { balance: -Math.abs(amount) }, // subtracting as negative increment
+                    $set: { updatedAt: new Date() },
+                }
+            );
+        });
+
+        await Promise.all(updatePromises);
+
+        res.json({ message: "Supplier balances subtracted successfully" });
+    } catch (err) {
+        console.error("Balance subtraction failed:", err);
+        res.status(500).json({
+            message: "Failed to subtract supplier balance",
+            error: err.message || err,
+        });
+    }
+}
+

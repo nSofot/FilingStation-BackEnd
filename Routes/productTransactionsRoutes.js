@@ -1,13 +1,13 @@
 import express from "express";
 import {    addProductTransaction,
-            getProductTransactionsByitemId
+            getProductTransactionsByitemId,
+            getProductTransactionsByReferenceId
         } from "../controllers/productTransactionsController.js";
 
 const productTransactionsRouter = express.Router();
 
-// router.get("/", customerTransactionsController.getCustomerTransactions);
-// router.get("/:transactionId", customerTransactionsController.getCustomerTransactionById);
 productTransactionsRouter.get("/productId/:productId", getProductTransactionsByitemId);
+productTransactionsRouter.get("/referenceId/:referenceId", getProductTransactionsByReferenceId);
 productTransactionsRouter.post("/", addProductTransaction);
 // router.put("/:transactionId", customerTransactionsController.updateCustomerTransaction);
 // router.delete("/:transactionId", customerTransactionsController.deleteCustomerTransaction);

@@ -58,6 +58,18 @@ export async function getGrn(req, res) {
 }
 
 
+export async function getPendingGRNs(req, res) {
+    try {
+        const pendingGRNs = await Grn.find({ isCompleted: false }); // example query
+        res.json(pendingGRNs);
+    } catch (err) {
+        console.error("Error fetching pending GRNs:", err);
+        res.status(500).json({ message: "Failed to fetch pending GRNs", error: err.message });
+    }
+}
+
+
+
 export async function getGrnProducts(req, res) {
     const { productId } = req.query;
 
@@ -126,5 +138,45 @@ export async function getLatestGRN(req, res) {
     } catch (err) {
         console.error("Error fetching latest GRN:", err);
         res.status(500).json({ message: "Server error while fetching GRN" });
+    }
+}
+
+
+export async function updateCompletedGRN(req, res) {
+    if (!isAdmin(req)) {
+        res.status(403).json({
+            message: "You are not authorized to update allocations"
+        });
+        return;
+    }
+
+    const trxId = req.params.trxId;
+
+    try {
+        const result = await Grn.updateOne(
+            { trxId: trxId },
+            { 
+                $set: { 
+                    isCompleted: true,
+                } 
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            // No GRN found with that ID
+            res.status(404).json({
+                message: "GRN not found"
+            });
+            return;
+        }
+
+        res.json({
+            message: "Allocation updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update allocation",
+            error: err.message || err
+        });
     }
 }
