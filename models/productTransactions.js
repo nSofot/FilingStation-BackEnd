@@ -32,6 +32,10 @@ const productTransactionsSchema = new mongoose.Schema({
                 type: String,
                 required: true
             },
+            image: {
+                type: String,
+                default: ""
+            },
             quantity: {
                 type: Number,
                 required: true

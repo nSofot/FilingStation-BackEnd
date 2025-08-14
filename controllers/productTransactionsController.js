@@ -3,12 +3,10 @@ import ProductTransactions from "../models/productTransactions.js";
 
 export async function addProductTransaction(req, res) {
     try {
-        // ✅ Ensure user is an admin
         if (!(await isAdmin(req))) {
         return res.status(403).json({ message: "You are not authorized to add a transaction" });
         }
 
-        // ✅ Properly check if transaction is NOT adjustment
         if (req.body.transactionType === "adjustment") {
             let referenceId = "AJST-A-000001"; // default for adjustments
 
@@ -26,16 +24,16 @@ export async function addProductTransaction(req, res) {
             req.body.referenceId = referenceId;
         }
 
-        // ✅ Create and save product transaction
-        const productTransaction = new ProductTransactions(req.body);
+    const productTransaction = new ProductTransactions(req.body);
         await productTransaction.save();
 
         res.status(201).json({
         message: "Product transaction created successfully",
         transaction: productTransaction,
         });
+
     } catch (err) {
-        console.error("❌ Error creating product transaction:", err);
+        console.error("Error saving product transaction:", err); // 👈 See exact validation error
         res.status(500).json({
         message: "Failed to create product transaction",
         error: err.message,
@@ -69,7 +67,40 @@ export async function getProductTransactionsByitemId(req, res) {
     }
 }
 
+export async function getProductTransactionsByReferenceId(req, res) {
+    try {
+        const { referenceId } = req.params;
 
+        const transactions = await ProductTransactions.findOne({
+            referenceId: referenceId
+        });
 
+        if (transactions.length === 0) {
+            return res.status(200).json([]);
+        }
 
+        res.status(200).json(transactions);
+    } catch (err) {
+        console.error("Error fetching product transactions:", err);
+        res.status(500).json({
+            message: "Failed to fetch product transactions",
+            error: err.message
+        });
+    }
+}
+
+// export const getProductTransactionsByReferenceId = async (req, res) => {
+//   try {
+//     const trx = await ProductTransactions.findOne({ referenceId: req.params.id });
+//     if (!trx) {
+//       return res.status(404).json({ message: "Transaction not found" });
+//     }
+//     res.json({
+//       products: trx.products, // ✅ send products directly
+//       transaction: trx
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error fetching transaction", error: err.message });
+//   }
+// };
 
