@@ -8,7 +8,7 @@ const supplierTransactionsSchema = new mongoose.Schema({
     },  
     transactionType: {
         type: String,
-        enum: ['invoice', 'receipt', 'credit_note', 'debit_note'],
+        enum: ['invoice', 'payment', 'credit_note', 'debit_note'],
         required: true
     },
     referenceNumber: {
@@ -34,16 +34,16 @@ const supplierTransactionsSchema = new mongoose.Schema({
         required: true
     },
     relatedInvoiceId: {
-        type: String,
-        default: ""
+        type: [String],
+        default: []
     },
     description: {
         type: String,
         trim: true
     },
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: String,
+        default: ""
     },
     createdAt: {
         type: Date,

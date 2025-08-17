@@ -13,7 +13,7 @@ const accountTransactionsSchema = new mongoose.Schema({
     transactionType: {
         type: String,
         required: true,
-        enum: ['invoice', 'receipt'],
+        enum: ['invoice', 'receipt', 'payment'],
     },
     accountId: {
         type: String,
