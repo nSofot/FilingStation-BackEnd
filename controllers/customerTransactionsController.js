@@ -10,6 +10,7 @@ export async function addCustomerTransaction(req, res) {
         const { transactionType } = req.body;
 
         const prefixMap = {
+            fuel_invoice: "INVC-A-",
             invoice: "INVC-C-",
             receipt: "RCPT-C-",
             credit_note: "CRDN-C-",
@@ -143,5 +144,52 @@ export async function getCustomerPendingTransactionByCustomerId(req, res) {
     } catch (err) {
         console.error("Error fetching pending transactions:", err);
         res.status(500).json({ message: "Server error while fetching pending transactions" });
+    }
+}
+
+export async function getCustomerPendingInvoicesByAttendantId(req, res) {
+    const { createdBy } = req.params;
+
+    try {
+        const transactions = await CustomerTransactions.find({
+            createdBy,
+            referenceNumber: { $regex: /^INVC-A-/ },
+            isAttCompleted: false,
+        });
+
+        res.json(transactions);
+    } catch (err) {
+        console.error("Error fetching pending transactions:", err);
+        res.status(500).json({ message: "Server error while fetching pending transactions" });
+    }
+}
+
+
+export async function updateCustomerTransactionIsCompleted(req, res) {
+    if (!isAdmin(req)) {
+        res.status(403).json({
+            message: "You are not authorized to update credit invoices"
+        });
+        return;
+    }
+    const { updates } = req.body;
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: "Invalid updates format" });
+    }
+    try {
+        const updatePromises = updates.map(update => {
+            const { referenceNumber } = update;
+            return CustomerTransactions.updateOne(
+                { referenceNumber },
+                { $set: { isAttCompleted: true } }
+            );
+        });
+        await Promise.all(updatePromises);
+        res.json({ message: "Customer transactions updated successfully" });
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update customer transactions",
+            error: err.message || err
+        });
     }
 }

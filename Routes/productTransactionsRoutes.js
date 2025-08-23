@@ -1,12 +1,14 @@
 import express from "express";
 import {    addProductTransaction,
             getProductTransactionsByitemId,
-            getProductTransactionsByReferenceId
+            getProductTransactionsByReferenceId,
+            getInvoiceTransactionsByitemIdAndDate
         } from "../controllers/productTransactionsController.js";
 
 const productTransactionsRouter = express.Router();
 
 productTransactionsRouter.get("/productId/:productId", getProductTransactionsByitemId);
+productTransactionsRouter.get("/invoice/:itemId/:openingDate", getInvoiceTransactionsByitemIdAndDate);
 productTransactionsRouter.get("/referenceId/:referenceId", getProductTransactionsByReferenceId);
 productTransactionsRouter.post("/", addProductTransaction);
 // router.put("/:transactionId", customerTransactionsController.updateCustomerTransaction);
