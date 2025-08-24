@@ -78,19 +78,19 @@ export async function getInvoiceTransactionsByitemIdAndDate(req, res) {
         const transactions = await ProductTransactions.find(
             {
                 "products.productId": itemId,
-                transactionDate: { $gt: openingDateObj },
+                createdAt: { $gt: openingDateObj },
                 transactionType: "fuel_invoice"
             },
             {
-                transactionDate: 1,
-                transactionType: 1,
+                // transactionDate: 1,
+                // transactionType: 1,
                 products: { $elemMatch: { productId: itemId } }
             }
         )
-        .sort({ transactionDate: 1 })
-        .lean()
-        .exec();
-
+        // .sort({ transactionDate: 1 })
+        // .lean()
+        // .exec();
+ 
         return res.status(200).json(transactions ?? []);
     } catch (err) {
         console.error("Error fetching product transactions:", err);

@@ -12,12 +12,12 @@ export async function addAllocation(req, res) {
     }
 
     // Generate next receipt ID
-    let allocationId = "ALC-000001";
+    let allocationId = "ALLC-000001";
     const lastAllocation = await Allocations.findOne().sort({ createdAt: -1 });
 
     if (lastAllocation) {
-        const lastId = parseInt(lastAllocation.allocationId.replace("ALC-", ""));
-        allocationId = "ALC-" + String(lastId + 1).padStart(6, "0");
+        const lastId = parseInt(lastAllocation.allocationId.replace("ALLC-", ""));
+        allocationId = "ALLC-" + String(lastId + 1).padStart(6, "0");
     }
 
     req.body.allocationId = allocationId;

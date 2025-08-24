@@ -8,7 +8,7 @@ const productTransactionsSchema = new mongoose.Schema({
     transactionType: {
         type: String,
         required: true,
-        enum: ['fuel_invoice', 'invoice', 'grn', 'adjustment', 'Meter_Reading'],
+        enum: ['fuel_invoice', 'invoice', 'grn', 'adjustment', 'Meter_Reading', 'Deallocation'],
     },
     transactionDate: {
         type: Date,
