@@ -12,7 +12,7 @@ export async function addSupplierTransaction(req, res) {
 
         const prefixMap = {
             invoice: "PINV-S-",
-            receipt: "RCPT-S-",
+            payment: "PAYV-S-",
             credit_note: "CRDN-S-",
             debit_note: "DBTN-S-"
         };
@@ -96,25 +96,10 @@ export async function getSupplierPendingTransactionsBySupplierId(req, res) {
     }
 }
 
-
-// export async function getSupplierPendingTransactionsBySupplierId(req, res) {
-//     try {
-//         const supplierId = req.params.supplierId;
-//         const transactions = await SupplierTransactions.find({ supplierId, isCredit: false, dueAmount: { $gt: 0 } });
-//         res.json(transactions);
-//     } catch (err) {
-//         res.status(500).json({
-//             message: "Failed to get supplier pending transactions",
-//             error: err.message
-//         });
-//     }
-// }
-
-
 export async function getLatestSupplierTransactionByType(req, res) {
 
     try {
-        const transactionType = req.params.transactionType;
+        const transactionType = req.params.type;
         const transactions = await SupplierTransactions.findOne({ transactionType }).sort({ createdAt: -1 });
         res.json(transactions);
     } catch (err) {
@@ -127,4 +112,35 @@ export async function getLatestSupplierTransactionByType(req, res) {
 }
 
 
+export async function updateOverdueTransactions(req, res) {
+    const referenceNumber = req.params.referenceNumber;
+    const paidAmount = parseFloat(req.body.paidAmount);
+
+    if (isNaN(paidAmount) || paidAmount <= 0) {
+        return res.status(400).json({ message: "Invalid paid amount." });
+    }
+
+    try {
+        const invoice = await SupplierTransactions.findOne({ referenceNumber });
+
+        if (!invoice) {
+            return res.status(404).json({ message: "Credit transction not found." });
+        }
+
+        const newDueAmount = parseFloat(invoice.dueAmount) - paidAmount;
+
+        invoice.dueAmount = newDueAmount >= 0 ? newDueAmount : 0;
+        await invoice.save();
+
+        return res.status(200).json({
+            message: "Due amount updated successfully.",
+            updatedDueAmount: invoice.dueAmount
+        });
+    } catch (err) {
+        console.error("Error updating credit invoice due amount:", err);
+        return res.status(500).json({
+            message: "Internal server error while updating due amount."
+        });
+    }
+}
 

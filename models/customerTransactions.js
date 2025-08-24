@@ -7,7 +7,7 @@ const customerTransactionsSchema = new mongoose.Schema({
     },  
     transactionType: {
         type: String,
-        enum: ['invoice', 'receipt', 'credit_note', 'debit_note', 'payment', 'adjustment'],
+        enum: ['fuel_invoice','invoice', 'receipt', 'credit_note', 'debit_note', 'payment', 'adjustment'],
         required: true
     },
     referenceNumber: {
@@ -43,6 +43,10 @@ const customerTransactionsSchema = new mongoose.Schema({
     },
     dueAmount: {
         type: Number
+    },
+    isAttCompleted: {
+        type: Boolean,
+        default: false
     },
     createdAt: {
         type: Date,
