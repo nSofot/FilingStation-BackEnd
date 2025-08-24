@@ -66,20 +66,54 @@ export async function getProductTransactionsByitemId(req, res) {
         });
     }
 }
+export async function getInvoiceTransactionsByitemIdAndDate(req, res) {
+    try {
+        const { itemId, openingDate } = req.params;
+        const openingDateObj = new Date(openingDate);
+
+        if (isNaN(openingDateObj.getTime())) {
+            return res.status(400).json({ message: "Invalid openingDate format" });
+        }
+
+        const transactions = await ProductTransactions.find(
+            {
+                "products.productId": itemId,
+                createdAt: { $gt: openingDateObj },
+                transactionType: "fuel_invoice"
+            },
+            {
+                // transactionDate: 1,
+                // transactionType: 1,
+                products: { $elemMatch: { productId: itemId } }
+            }
+        )
+        // .sort({ transactionDate: 1 })
+        // .lean()
+        // .exec();
+ 
+        return res.status(200).json(transactions ?? []);
+    } catch (err) {
+        console.error("Error fetching product transactions:", err);
+        return res.status(500).json({
+            message: "Failed to fetch product transactions",
+            error: err.message,
+            stack: err.stack // 👈 helpful while debugging
+        });
+    }
+}
+
 
 export async function getProductTransactionsByReferenceId(req, res) {
     try {
         const { referenceId } = req.params;
 
-        const transactions = await ProductTransactions.findOne({
-            referenceId: referenceId
-        });
+        const transaction = await ProductTransactions.findOne({ referenceId });
 
-        if (transactions.length === 0) {
-            return res.status(200).json([]);
+        if (!transaction) {
+            return res.status(404).json({ message: "No transaction found" });
         }
 
-        res.status(200).json(transactions);
+        res.status(200).json(transaction);
     } catch (err) {
         console.error("Error fetching product transactions:", err);
         res.status(500).json({
@@ -89,18 +123,5 @@ export async function getProductTransactionsByReferenceId(req, res) {
     }
 }
 
-// export const getProductTransactionsByReferenceId = async (req, res) => {
-//   try {
-//     const trx = await ProductTransactions.findOne({ referenceId: req.params.id });
-//     if (!trx) {
-//       return res.status(404).json({ message: "Transaction not found" });
-//     }
-//     res.json({
-//       products: trx.products, // ✅ send products directly
-//       transaction: trx
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: "Error fetching transaction", error: err.message });
-//   }
-// };
+
 

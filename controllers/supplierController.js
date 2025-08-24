@@ -241,33 +241,74 @@ export async function addSupplierBalance(req, res) {
 }
 
 
+// export async function subtractSupplierBalance(req, res) {
+//     if (!isAdmin(req)) {
+//         return res.status(403).json({ message: "Not authorized" });
+//     }
+
+//     const { updates } = req.body;
+//     if (!updates || !Array.isArray(updates)) {
+//         return res.status(400).json({ message: "updates array is required" });
+//     }
+
+//     try {
+//         const updatePromises = updates.map(({ supplierId, amount }) => {
+//             if (!supplierId || typeof amount !== 'number') {
+//                 throw new Error(`Invalid data for supplierId: ${supplierId}`);
+//             }
+
+//             return Supplier.updateOne(
+//                 { supplierId },
+//                 {
+//                     $inc: { balance: -Math.abs(amount) }, // subtracting as negative increment
+//                     $set: { updatedAt: new Date() },
+//                 }
+//             );
+//         });
+
+//         await Promise.all(updatePromises);
+
+//         res.json({ message: "Supplier balances subtracted successfully" });
+//     } catch (err) {
+//         console.error("Balance subtraction failed:", err);
+//         res.status(500).json({
+//             message: "Failed to subtract supplier balance",
+//             error: err.message || err,
+//         });
+//     }
+// }
+
 export async function subtractSupplierBalance(req, res) {
     if (!isAdmin(req)) {
         return res.status(403).json({ message: "Not authorized" });
     }
 
     const { updates } = req.body;
-
     if (!updates || !Array.isArray(updates)) {
         return res.status(400).json({ message: "updates array is required" });
     }
 
     try {
-        const updatePromises = updates.map(({ supplierId, amount }) => {
-            if (!customerId || typeof amount !== 'number') {
+        for (const { supplierId, amount } of updates) {
+            if (!supplierId || typeof amount !== 'number') {
                 throw new Error(`Invalid data for supplierId: ${supplierId}`);
             }
 
-            return Supplier.updateOne(
-                { supplierId },
-                {
-                    $inc: { balance: -Math.abs(amount) }, // subtracting as negative increment
-                    $set: { updatedAt: new Date() },
-                }
-            );
-        });
+            const supplier = await Supplier.findOne({ supplierId });
+            if (!supplier) {
+                console.warn(`Supplier not found: ${supplierId}`);
+                continue;
+            }
 
-        await Promise.all(updatePromises);
+            // Ensure balance is a number
+            supplier.balance = Number(supplier.balance) || 0;
+
+            // Subtract amount
+            supplier.balance -= Math.abs(amount);
+            supplier.updatedAt = new Date();
+
+            await supplier.save();
+        }
 
         res.json({ message: "Supplier balances subtracted successfully" });
     } catch (err) {
@@ -278,4 +319,3 @@ export async function subtractSupplierBalance(req, res) {
         });
     }
 }
-
