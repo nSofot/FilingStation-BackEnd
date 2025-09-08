@@ -19,19 +19,25 @@ const customerSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        required: true
+        default: ""
     },
     mobile: {
         type: String,
-        required: true
+        default: ""
     },
     phone: {
         type: String,
+        default: ""
     },
     email: {
-        type: String
+        type: String,
+        default: ""
     },
     balance: {
+        type: Number,
+        default: 0
+    },
+    chequeBalance: {
         type: Number,
         default: 0
     },
