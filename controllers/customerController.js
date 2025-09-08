@@ -39,26 +39,28 @@ export async function CreateCustomer(req, res) {
 }
 
 
-export async function getCustomer(req,res) {
-
-    try{
-        if(isAdmin(req)){
-            const customers = await Customer.find()
-            res.json(customers)
-        }
-        else{
-            const customers = await Customer.find({isActive : true})
-            res.json(customers)
+export async function getCustomer(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
         }
 
-    }
-    catch(err){
+        const isAdminUser = (req.user.role || "").toLowerCase() === "admin";
+
+        const customers = isAdminUser
+            ? await Customer.find()
+            : await Customer.find({ isActive: true });
+
+        res.json(customers);
+    } catch (err) {
         res.status(500).json({
-            message : "Error getting customers",
-            error: err
-        })
+            message: "Error getting customers",
+            error: err.message, // only send error message
+        });
     }
 }
+
+
 
 
 export async function getCustomerById(req, res) {
@@ -166,32 +168,44 @@ export async function updateCustomer(req, res) {
 
 
 export async function searchCustomers(req, res) {
-	const searchQuery = req.query.query || "";
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
 
-	try {
-		const regex = { $regex: searchQuery, $options: "i" };
+    const isAdminUser = (req.user.role || "").toLowerCase() === "admin";  
+    const searchQuery = (req.query.query || "").trim();
 
-		const filter = {
-			isActive: true,
-			...(searchQuery.trim() !== "" && {
-				$or: [
-					{ name: regex },
+    try {
+        const regex = { $regex: searchQuery, $options: "i" };
+
+        // Base filter for non-admin users
+        let filter = isAdminUser ? {} : { isActive: true };
+
+        // Apply search conditions if query is not empty
+        if (searchQuery !== "") {
+            const searchCondition = {
+                $or: [
+                    { name: regex },
                     { address: regex },
                     { mobile: regex },
-					{ vehicleNumbers: { $elemMatch: regex } }
-				]
-			})
-		};
+                    { vehicleNumbers: { $elemMatch: regex } }
+                ]
+            };
+            filter = { ...filter, ...searchCondition };
+        }
 
-		const customers = await Customer.find(filter);
-		res.json(customers);
-	} catch (err) {
-		res.status(500).json({
-			message: "Error searching customers",
-			error: err
-		});
-	}
+        const customers = await Customer.find(filter);
+        res.json(customers);
+    } catch (err) {
+        console.error("Error searching customers:", err);
+        res.status(500).json({
+            message: "Error searching customers",
+            error: err.message
+        });
+    }
 }
+
+
 
 
 export async function addCustomerBalance(req, res) {

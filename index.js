@@ -6,6 +6,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 // Route Imports
+import companyDataRoutes from "./Routes/companyDataRoutes.js";
 import userRouter from "./Routes/userRouter.js";
 import productRouter from "./Routes/productRouter.js";
 import categoryRouter from "./Routes/categoryRouter.js";
@@ -26,6 +27,7 @@ import productTransactionsRouter from "./Routes/productTransactionsRoutes.js";
 import accountTransactionsRouter from "./Routes/accountTransactionsRoutes.js";
 import chequeBookInwardRoutes from "./Routes/chequeBookInwardRoutes.js";
 import chequeBookOutwardRouter from "./Routes/chequeBookOutwardRoutes.js";
+import importCustomerRoute from "./Routes/importCustomerRoute.js";
 
 
 dotenv.config();
@@ -60,6 +62,7 @@ mongoose.connect(process.env.MONGODB_URL)
     .catch(() => console.log("Connection failed"));
 
 // Routes
+app.use("/api/company", companyDataRoutes);
 app.use("/api/user", userRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/supplier", supplierRouter);
@@ -81,6 +84,7 @@ app.use("/api/accountTransactions", accountTransactionsRouter);
 // app.use("/api/customerReceipt", customerReceiptRoutes);
 app.use("/api/chequeBookInward", chequeBookInwardRoutes);
 app.use("/api/chequeBookOutward", chequeBookOutwardRouter);
+app.use("/api/import-customers", importCustomerRoute);
 
 
 // Default 404 handler
