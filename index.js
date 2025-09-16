@@ -28,6 +28,7 @@ import accountTransactionsRouter from "./Routes/accountTransactionsRoutes.js";
 import chequeBookInwardRoutes from "./Routes/chequeBookInwardRoutes.js";
 import chequeBookOutwardRouter from "./Routes/chequeBookOutwardRoutes.js";
 import importCustomerRoute from "./Routes/importCustomerRoute.js";
+import importChartOfAccountsRoute from "./Routes/importChartOfAccountsRoute.js";
 
 
 dotenv.config();
@@ -81,10 +82,10 @@ app.use("/api/customerTransactions", customerTransactionsRouter);
 app.use("/api/supplierTransactions", supplierTransactionsRouter);
 app.use("/api/productTransactions", productTransactionsRouter);
 app.use("/api/accountTransactions", accountTransactionsRouter);
-// app.use("/api/customerReceipt", customerReceiptRoutes);
 app.use("/api/chequeBookInward", chequeBookInwardRoutes);
 app.use("/api/chequeBookOutward", chequeBookOutwardRouter);
 app.use("/api/import-customers", importCustomerRoute);
+app.use("/api/import-ledger-accounts", importChartOfAccountsRoute);
 
 
 // Default 404 handler

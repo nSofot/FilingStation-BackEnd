@@ -34,12 +34,24 @@ const supplierTransactionsSchema = new mongoose.Schema({
         required: true
     },
     relatedInvoiceId: {
-        type: [String],
+        type: [
+        {
+            paidReference: {
+                type: String,
+                default: ""
+            },
+            paidAmount: {
+                type: Number,
+                default: 0
+            }
+        }
+        ],
         default: []
     },
     description: {
         type: String,
-        trim: true
+        trim: true,
+        default: ""
     },
     createdBy: {
         type: String,

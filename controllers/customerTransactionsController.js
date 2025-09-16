@@ -42,6 +42,8 @@ export async function addCustomerTransaction(req, res) {
 
         res.status(201).json({
             message: "Customer transaction created successfully",
+            success: true,
+            referenceNumber: customerTransaction.referenceNumber, // return it here            
             transaction: customerTransaction // ✅ Corrected
         });
     } catch (err) {
@@ -122,10 +124,8 @@ export async function getCustomerTransactionByCustomerId(req, res) {
         if (transactions.length === 0) {
             return res.status(404).json({ message: "No transactions found for this customer" });
         }
-
         res.json(transactions);
     } catch (err) {
-        console.error("Error fetching transactions:", err);
         res.status(500).json({ message: "Server error while fetching transactions" });
     }
 }
