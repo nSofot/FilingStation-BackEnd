@@ -122,6 +122,3 @@ export async function getProductTransactionsByReferenceId(req, res) {
         });
     }
 }
-
-
-

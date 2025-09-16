@@ -185,8 +185,7 @@ export async function searchSuppliers(req, res) {
 }
 
 
-export async function addSupplierBalance(req, res) {    
-  
+export async function addSupplierBalance(req, res) {
     if (!isAdmin(req)) {
         return res.status(403).json({ message: "Not authorized" });
     }
@@ -197,48 +196,53 @@ export async function addSupplierBalance(req, res) {
         return res.status(400).json({ message: "updates array is required" });
     }
 
-    // Validate first
     const invalidEntries = updates.filter(
-        ({ supplierId, amount }) => !supplierId || typeof amount !== 'number'
+        ({ supplierId, amount }) => !supplierId || typeof amount !== "number"
     );
+
     if (invalidEntries.length > 0) {
         return res.status(400).json({
-            message: "Invalid supplier updates",
-            invalidEntries
+        message: "Invalid supplier updates",
+        invalidEntries
         });
     }
 
     try {
         const results = await Promise.allSettled(
-            updates.map(({ supplierId, amount }) =>
-                Supplier.updateOne(
-                    { supplierId },
-                    {
-                        $inc: { balance: amount }, // can be positive or negative
-                        $set: { updatedAt: new Date() }
-                    }
-                )
-            )
+            updates.map(async ({ supplierId, amount }) => {
+                const result = await Supplier.updateOne(
+                { supplierId },
+                { $inc: { balance: amount }, $set: { updatedAt: new Date() } }
+                );
+                console.log(`Supplier ${supplierId} update result:`, result);
+                return result;
+            })
         );
 
+
         const failed = results
-            .map((res, i) => res.status === 'rejected' ? updates[i].supplierId : null)
-            .filter(Boolean);
+        .map((r, i) =>
+            r.status === "rejected"
+            ? { supplierId: updates[i].supplierId, reason: r.reason.message }
+            : null
+        )
+        .filter(Boolean);
 
         res.json({
-            message: failed.length === 0
-                ? "Supplier balances updated successfully"
-                : "Some supplier updates failed",
-            failedSuppliers: failed
+        message: failed.length === 0
+            ? "Supplier balances updated successfully"
+            : "Some supplier updates failed",
+        failedSuppliers: failed
         });
     } catch (err) {
         console.error("Bulk addition failed:", err);
         res.status(500).json({
-            message: "Failed to update supplier balances",
-            error: err.message || err
+        message: "Failed to update supplier balances",
+        error: err.message || err
         });
     }
 }
+
 
 
 // export async function subtractSupplierBalance(req, res) {

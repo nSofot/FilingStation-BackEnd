@@ -2,47 +2,65 @@ import mongoose from "mongoose";
 
 const ledgerAccountSchema = new mongoose.Schema(
     {
-        /* e.g. "1000-0001" */
+        /* e.g. "100-001" */
         accountId: { 
             type: String, 
             required: true, 
             unique: true 
         },
 
-        /* Asset / Liability / Equity / Income / Expense */
+        /* Header accounts / Child accounts / Child ledgers */
         accountType: {
+            type: String,
+            required: true,
+            enum: ["Header accounts", "Child accounts", "Child ledgers"],
+        },
+
+        /* Asset / Liability / Equity / Income / Expense */
+        accountCategory: {
             type: String,
             required: true,
             enum: ["Asset", "Liability", "Equity", "Income", "Expense"],
         },
 
-        /* Parent header (nullable for top‑level accounts) */
-        headerAccountId: { 
-            type: String, 
-            default: null 
+        /* Current Assets | Non-Current Assets | Current Liabilities | Long-Term Liabilities | 
+        Equity / Capital | Income / Revenue | Cost of Sales | Operating Expenses | Financial Expenses | Depreciation */
+        accountSubCategory: {
+            type: String,
+            default: ""
         },
 
-        /* Human‑readable name */
+        headerAccount: { 
+            type: String, 
+            default: ""
+        },
+
         accountName: { 
             type: String, 
-            required: true 
+            default: ""
         },
 
-        /* Current balance; store as Decimal128 or integer cents */
         accountBalance: {
             type: Number,
             default: 0,
         },
 
-        createdBy: { 
-            type: String, 
-            required: true 
+        updatedAt: {
+            type: Date,
+            default: Date.now
         },
-    },
-    { timestamps: true, collection: "ledger_accounts" } // handles createdAt / updatedAt
+
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+
+        isDeleted: {
+            type: Boolean,
+            default: false
+        }
+    }
 );
 
-/* optional: speed up “get by header” */
-ledgerAccountSchema.index({ headerAccountId: 1, accountName: 1 });
-
-export default mongoose.model("LedgerAccount", ledgerAccountSchema);
+const LedgerAccount = mongoose.model("LedgerAccount", ledgerAccountSchema);
+export default LedgerAccount;

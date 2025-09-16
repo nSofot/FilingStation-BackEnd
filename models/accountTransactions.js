@@ -13,7 +13,7 @@ const accountTransactionsSchema = new mongoose.Schema({
     transactionType: {
         type: String,
         required: true,
-        enum: ['invoice', 'receipt', 'payment'],
+        enum: ['invoice', 'receipt', 'payment', 'deposit', 'credit_note', 'debit_note'],
     },
     accountId: {
         type: String,
@@ -21,7 +21,7 @@ const accountTransactionsSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true
+        default: ""
     },
     trxType: {
         type: String,
