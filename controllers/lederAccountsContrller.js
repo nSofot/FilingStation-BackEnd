@@ -13,29 +13,26 @@ export async function createLedgerAccount(req, res) {
             return res.status(403).json({ message: "You are not authorized to add ledger account" });
         }
 
-        // 2️⃣ Required field check
+        // 2️⃣ Required fields
         if (!req.body.accountName) {
             return res.status(400).json({ message: "Account name is required" });
         }
 
-        if (!req.body.accountType) {
-            return res.status(400).json({ message: "Account type is required" });
+        // 3️⃣ Validate header account
+        const headerAccountDoc = await LedgerAccounts.findOne({ accountId: headerAccountId + "-000" }).lean();
+        if (!headerAccountDoc) {
+            return res.status(400).json({ message: "Invalid header account ID" });
         }
 
-        // 3️⃣ Optional: Validate headerAccountId exists (if not top-level)
-        // const idNum = parseInt(headerAccountId, 10);
-        // if (!isNaN(idNum) && idNum > 0 && idNum < 999) {
-        //     const headerExists = await LedgerAccounts.exists({ accountId: headerAccountId });
-        //     if (!headerExists) {
-        //         return res.status(400).json({ message: "Invalid header account ID" });
-        //     }
-        // }
-        
+        const accountType = "Child ledgers"; // or inherit from header
+        const accountCategory = headerAccountDoc.accountCategory;
+        const accountSubCategory = headerAccountDoc.accountSubCategory;
+        const headerAccount = headerAccountDoc.headerAccount;
 
-        // 4️⃣ Find last account under this header
+        // 4️⃣ Find last child account under this header
         const last = await LedgerAccounts
             .findOne({ accountId: new RegExp(`^${headerAccountId}-\\d{4}$`) })
-            .sort({ accountId: -1 }) // highest suffix first
+            .sort({ accountId: -1 })
             .lean();
 
         let nextNumber = 1;
@@ -46,17 +43,19 @@ export async function createLedgerAccount(req, res) {
 
         const accountId = `${headerAccountId}-${String(nextNumber).padStart(4, "0")}`;
 
-        // 5️⃣ Auto-fill createdBy from user session (if available)
+        // 5️⃣ CreatedBy
         const createdBy = req.user?.username || "system";
 
-        // 6️⃣ Create account
-        const { accountName, accountType } = req.body;
+        // 6️⃣ Create
+        const { accountName } = req.body;
         const newAccount = new LedgerAccounts({
             accountId,
             accountType,
+            accountCategory,
+            accountSubCategory,
+            headerAccount,
             accountName,
-            headerAccountId,
-            createdBy,
+            createdBy
         });
 
         await newAccount.save();
@@ -78,6 +77,7 @@ export async function createLedgerAccount(req, res) {
         });
     }
 }
+
 
 
 export async function getLedgerAccounts(req, res) {

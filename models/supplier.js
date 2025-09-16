@@ -25,7 +25,9 @@ const supplierSchema = new mongoose.Schema({
     },
     balance: {
         type: Number,
-        default: 0
+        default: 0,
+        required: true,   // ✅ ensures it won’t be null
+        set: v => v == null ? 0 : v // ✅ converts null → 0
     },
     contactPerson: {
         type: String

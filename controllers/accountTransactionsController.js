@@ -38,10 +38,11 @@ export async function createAccountTransaction(req, res) {
         }
 
         const { trxId, accountId, trxDate, description, transactionType, trxType, trxAmount } = req.body;
-
-        if (!trxId || !accountId || !trxDate || !description || !trxType || trxAmount == null ) {
+        
+        if (!trxId || !accountId || !trxDate || !trxType || trxAmount == null) {
             return res.status(400).json({ message: "Missing required fields" });
         }
+
 
         // Convert trxDate string to Date object if necessary
         const trxDateObj = new Date(trxDate);
