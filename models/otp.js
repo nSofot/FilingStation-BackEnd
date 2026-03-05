@@ -2,8 +2,12 @@ import mongoose from "mongoose"
 
 const OTPSchema = mongoose.Schema({
     email : {
-        require : true,
-        type : String
+        type : String,
+        default : null
+    },
+    mobile : {
+        type : String,
+        default : null
     },
     otp : {
         require : true,
