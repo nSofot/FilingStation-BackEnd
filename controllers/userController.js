@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import OTP from "../models/otp.js";
+import { sendSMS } from "../utils/sendSms.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import axios from "axios";
@@ -61,10 +62,23 @@ export async function createUser(req, res) {
 
 // ✅ Login User
 export async function loginUsers(req, res) {
-  const { email, password } = req.body;
+  const { email, mobile, password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ message: "Password is required" });
+  }
 
   try {
-    const user = await User.findOne({ email });
+    // Build conditions for email OR mobile
+    const conditions = [];
+    if (email) conditions.push({ email });
+    if (mobile) conditions.push({ mobile });
+
+    if (conditions.length === 0) {
+      return res.status(400).json({ message: "Email or mobile is required" });
+    }
+
+    const user = await User.findOne({ $or: conditions });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const valid = bcrypt.compareSync(process.env.JWT_KEY + password, user.password);
@@ -73,6 +87,7 @@ export async function loginUsers(req, res) {
     const token = jwt.sign({
       userId: user.userId,
       email: user.email,
+      mobile: user.mobile,
       firstname: user.firstname,
       lastname: user.lastname,
       role: user.role,
@@ -191,43 +206,106 @@ const transport = nodemailer.createTransport({
 });
 
 // ✅ Send OTP
+// This function sends an OTP to the user's email and mobile number for password reset purposes.
 export async function sendOTP(req, res) {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ message: "Email is required" });
+  const { email, mobile } = req.body;
+
+  // ✅ Allow email OR mobile
+  if (!email && !mobile) {
+    return res.status(400).json({
+      message: "Email or mobile number is required",
+    });
+  }
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    let user;
 
-    await OTP.deleteMany({ email });
-    const randomOTP = Math.floor(100000 + Math.random() * 900000);
-    await new OTP({ email, otp: randomOTP }).save();
+    if (email) {
+      user = await User.findOne({ email });
+      if (!user)
+        return res.status(404).json({ message: "User email not found" });
+    } else {
+      user = await User.findOne({ mobile });
+      if (!user)
+        return res.status(404).json({ message: "User mobile not found" });
+    }
 
-    await transport.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Reset Password - FuelManager",
-      text: `Your password reset OTP is: ${randomOTP}. This OTP will expire in 10 minutes.`,
+    // // console.log("User found for OTP:", user);
+
+    // Clear old OTPs
+    await OTP.deleteMany({
+      $or: [{ email }, { mobile }],
     });
 
-    res.json({ message: "OTP sent successfully" });
+    const randomOTP = Math.floor(100000 + Math.random() * 900000);
+
+    await OTP.create({
+      email: email || null,
+      mobile: mobile || null,
+      otp: randomOTP,
+    });
+
+    if (email) {
+      await transport.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Reset Password - CloudFuel Manager ERP",
+        text: `Your password reset OTP is: ${randomOTP}. This OTP will expire in 10 minutes.`,
+      });
+    }
+
+    if (mobile) {
+      await sendSMS(
+        user.mobile,
+        `CloudFuel Manager ERP OTP: ${randomOTP}. Valid for 10 minutes.`
+      );
+    }
+
+    // ✅ Single response
+    return res.json({
+      message: "OTP sent successfully",
+    });
   } catch (err) {
-    res.status(500).json({ message: "Failed to send OTP", error: err.message });
+    return res.status(500).json({
+      message: "Failed to send OTP",
+      error: err.message,
+    });
   }
 }
 
 // ✅ Reset Password
 export async function resetPassword(req, res) {
-  const { email, otp, newPassword } = req.body;
+  const { email, mobile, otp, newPassword } = req.body;
 
   try {
-    const otpDoc = await OTP.findOne({ email });
+    const conditions1 = [];
+    if (email) conditions1.push({ email });
+    if (mobile) conditions1.push({ mobile });
+
+    const otpDoc = await OTP.findOne({
+        $or: conditions1
+    });
+
     if (!otpDoc) return res.status(404).json({ message: "No OTP requests found" });
     if (String(otp) !== String(otpDoc.otp)) return res.status(403).json({ message: "Invalid OTP" });
 
-    await OTP.deleteMany({ email });
+    const conditions2 = [];
+      if (email) conditions2.push({ email });
+      if (mobile) conditions2.push({ mobile });
+
+      await OTP.deleteMany({
+          $or: conditions2
+    });
+
     const hashedPassword = bcrypt.hashSync(process.env.JWT_KEY + newPassword, 10);
-    await User.updateOne({ email }, { password: hashedPassword });
+    const conditions3 = [];
+      if (email) conditions3.push({ email });
+      if (mobile) conditions3.push({ mobile });
+
+      await User.updateOne(
+          { $or: conditions3 },
+          { password: hashedPassword }
+    );
 
     res.json({ message: "Password has been reset successfully" });
   } catch (err) {

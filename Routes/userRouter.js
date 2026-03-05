@@ -19,7 +19,7 @@ userRouter.get("/users", getUsers);
 userRouter.get("/", getUser);
 userRouter.put("/:userId", updateUser);
 userRouter.delete("/:userId", deleteUser);
-userRouter.post("/send-OPT", sendOTP);
+userRouter.post("/send-OTP", sendOTP);
 userRouter.post("/reset-password", resetPassword);
 
 
