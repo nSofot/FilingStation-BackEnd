@@ -28,7 +28,8 @@ const userSchema = new mongoose.Schema({
     },
     role: { 
         type: String, 
-        required: true, 
+        required: true,
+        enum: ['admin', 'manager', 'accountant', 'cashier', 'pumpman', 'user']
     },
     isActive: { 
         type: Boolean, 
@@ -41,7 +42,7 @@ const userSchema = new mongoose.Schema({
     dateOfBirth: { 
         type: Date,  
     },
-}, { timestamps: true }); // 👈 Adds createdAt and updatedAt automatically
+}, { timestamps: true });
 
 
 const User = mongoose.model("User", userSchema);
