@@ -9,6 +9,6 @@ const companyDataRoutes = express.Router();
 
 companyDataRoutes.get("/", getCompanyData);
 companyDataRoutes.post("/", createCompanyData);
-companyDataRoutes.put("/", updateCompanyData);
+companyDataRoutes.put("/:companyId", updateCompanyData);
 
 export default companyDataRoutes;
