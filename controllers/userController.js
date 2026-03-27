@@ -62,27 +62,34 @@ export async function createUser(req, res) {
 
 // ✅ Login User
 export async function loginUsers(req, res) {
-  const { email, mobile, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!password) {
-    return res.status(400).json({ message: "Password is required" });
+  // Validation
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and password are required" });
   }
 
   try {
-    const conditions = [];
-    if (email) conditions.push({ email });
-    if (mobile) conditions.push({ mobile });
+    // Find user by email OR mobile
+    const user = await User.findOne({
+      $or: [{ email: username }, { mobile: username }]
+    });
 
-    if (conditions.length === 0) {
-      return res.status(400).json({ message: "Email or mobile is required" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const user = await User.findOne({ $or: conditions });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // Check password
+    const valid = bcrypt.compareSync(
+      process.env.JWT_KEY + password,
+      user.password
+    );
 
-    const valid = bcrypt.compareSync(process.env.JWT_KEY + password, user.password);
-    if (!valid) return res.status(401).json({ message: "Invalid password" });
+    if (!valid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
 
+    // Generate token
     const token = jwt.sign(
       {
         userId: user.userId,
@@ -98,7 +105,7 @@ export async function loginUsers(req, res) {
       { expiresIn: "1d" }
     );
 
-    // user data for frontend
+    // Send user data
     const userData = {
       userId: user.userId,
       name: user.firstname,
@@ -107,14 +114,17 @@ export async function loginUsers(req, res) {
       image: user.image
     };
 
-    res.json({
+    return res.json({
       message: "Login successful",
       token,
       user: userData
     });
 
   } catch (err) {
-    res.status(500).json({ message: "Login failed", error: err.message });
+    return res.status(500).json({
+      message: "Login failed",
+      error: err.message
+    });
   }
 }
 
